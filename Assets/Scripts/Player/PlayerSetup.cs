@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 
+[RequireComponent(typeof(Player))]
 public class PlayerSetup : NetworkBehaviour {
 
 	[SerializeField]
@@ -14,22 +15,26 @@ public class PlayerSetup : NetworkBehaviour {
 	void Start() {
 		if (!isLocalPlayer) {
 			Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
             DisableComponents();
             AssignRemoteLayer();
 		} else {
-			Cursor.visible = false;
-			sceneCamera = Camera.main;
+            Cursor.visible = false; 
+            Cursor.lockState = CursorLockMode.Locked;
+            sceneCamera = Camera.main;
 			if (sceneCamera != null) {
 				sceneCamera.gameObject.SetActive(false);
 			}
 		}
-        RegisterPlayer();
+        GetComponent<Player>().Setup();
 	}
 
-    void RegisterPlayer()
+    public override void OnStartClient()
     {
-        string ID = "Player " + GetComponent<NetworkIdentity>().netId;
-        transform.name = ID;
+        base.OnStartClient();
+        string netId = GetComponent<NetworkIdentity>().netId.ToString();
+        Player player = GetComponent<Player>();
+        GameManager.RegisterPlayer(netId, player);
     }
 
     void AssignRemoteLayer()
@@ -49,5 +54,7 @@ public class PlayerSetup : NetworkBehaviour {
 		if (sceneCamera != null) {
 			sceneCamera.gameObject.SetActive(true);
 		}
+
+        GameManager.UnRegisterPlayer(transform.name);
 	}
 }

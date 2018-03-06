@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMotor : MonoBehaviour {
+[RequireComponent(typeof(PlayerVisibility))]
+public class PlayerMotor : NetworkBehaviour {
 
 	[SerializeField]
 	private Camera cam;
@@ -12,23 +14,40 @@ public class PlayerMotor : MonoBehaviour {
     [SerializeField]
     private float jumpSpeed = 5.0f;
 
-    private Vector3 velocity = Vector3.zero;
-	private Vector3 rotation = Vector3.zero;
+    [SyncVar]
+    public Vector3 velocity = Vector3.zero;
+	public Vector3 rotation = Vector3.zero;
+
 	private float camRotation = 0;
     private float currCamRotation = 0;
     
     private bool inJump = false;
 	private Rigidbody rb;
 
+    private PlayerVisibility playerVis;
+
+
+
 	void Start()
 	{
 		rb = GetComponent<Rigidbody> ();
-	}
-		
+        playerVis = GetComponent<PlayerVisibility>();
+    }
+
 	public void Move(Vector3 _velocity)
 	{
-		velocity = _velocity;
+        if (isLocalPlayer)
+        {
+            CmdUpdateMove(_velocity);
+        }
 	}
+
+    [Command]
+    public void CmdUpdateMove(Vector3 _velocity)
+    {
+        velocity = _velocity;
+        playerVis.CmdUpdateVis(_velocity);
+    }
 
 	public void Rotate(Vector3 _rotation)
 	{
