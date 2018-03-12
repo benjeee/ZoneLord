@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Networking;
 
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(PlayerVisibility))]
 public class PlayerMotor : NetworkBehaviour {
 
 	[SerializeField]
@@ -14,42 +14,39 @@ public class PlayerMotor : NetworkBehaviour {
     [SerializeField]
     private float jumpSpeed = 5.0f;
 
-    [SyncVar]
+
     public Vector3 velocity = Vector3.zero;
 	public Vector3 rotation = Vector3.zero;
 
 	private float camRotation = 0;
     private float currCamRotation = 0;
     
-    private bool inJump = false;
+    public bool inJump = false;
 	private Rigidbody rb;
 
-    private PlayerVisibility playerVis;
-
-
+    Player player;
 
 	void Start()
 	{
 		rb = GetComponent<Rigidbody> ();
-        playerVis = GetComponent<PlayerVisibility>();
     }
 
-	public void Move(Vector3 _velocity)
-	{
-        if (isLocalPlayer)
-        {
-            CmdUpdateMove(_velocity);
-        }
-	}
-
-    [Command]
-    public void CmdUpdateMove(Vector3 _velocity)
+    public void Move(Vector3 _velocity)
     {
         velocity = _velocity;
-        playerVis.CmdUpdateVis(_velocity);
     }
 
-	public void Rotate(Vector3 _rotation)
+    public bool Jump()
+    {
+        if (!inJump)
+        {
+            rb.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
+            return true;
+        }
+        return false;
+    }
+
+    public void Rotate(Vector3 _rotation)
 	{
 		rotation = _rotation;
 	}
@@ -59,7 +56,6 @@ public class PlayerMotor : NetworkBehaviour {
 		camRotation = _camRotation;
 	}
 
-	//run every physics tick
 	void FixedUpdate()
 	{
 		PerformMovement ();
@@ -85,17 +81,13 @@ public class PlayerMotor : NetworkBehaviour {
 		}
 	}
 
-    public void Jump()
-    {
-        if (!inJump)
-        {
-            rb.AddForce(new Vector3(0, jumpSpeed, 0), ForceMode.Impulse);
-        }
-        inJump = true;
-    }
-
     void OnCollisionStay(Collision collisionInfo)
     {
         inJump = false;
+    }
+
+    void OnCollisionExit(Collision collisionInfo)
+    {
+        inJump = true;
     }
 }

@@ -5,6 +5,17 @@ using UnityEngine.Networking;
 
 public class PlayerVisibility : NetworkBehaviour {
 
+
+    static Dictionary<int, float> StateToVisibility = new Dictionary<int, float>()
+    {
+        { PlayerController.STILL, 0.05f},
+        { PlayerController.RUNNING, 0.7f},
+        { PlayerController.JUMPING, 0.7f},
+        { PlayerController.SHOOTING, 1f},
+        { PlayerController.WALKING, 0.2f}
+    };
+
+
     [SerializeField]
     private Renderer playerRenderer;
 
@@ -29,8 +40,22 @@ public class PlayerVisibility : NetworkBehaviour {
     }
 
     [Command]
-    public void CmdUpdateVis(Vector3 velocity)
+    public void CmdUpdateVis(int prevState, int newState)
     {
-        visibilityCoefficient = ((float)velocity.sqrMagnitude / 144f) * .5f + .05f;
+        float lerpFrom = StateToVisibility[prevState];
+        float lerpTo = StateToVisibility[newState];
+        StartCoroutine(VisibilityLerp(lerpFrom, lerpTo));
+    }
+
+    IEnumerator VisibilityLerp(float lerpFrom, float lerpTo)
+    {
+        float elapsedTime = 0;
+        float time = Mathf.Abs(lerpFrom - lerpTo);
+        while (elapsedTime < time)
+        {
+            visibilityCoefficient = Mathf.Lerp(lerpFrom, lerpTo, (elapsedTime / time));
+            elapsedTime += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
     }
 }

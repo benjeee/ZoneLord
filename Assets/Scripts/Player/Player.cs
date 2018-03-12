@@ -5,14 +5,8 @@ using UnityEngine.Networking;
 
 public class Player : NetworkBehaviour {
 
-    public enum PlayerState
-    {
-        Still,
-        Walking,
-        Running,
-        Jumping,
-        Shooting
-    }
+
+
 
     [SyncVar]
     private bool _isDead = false;
@@ -31,6 +25,9 @@ public class Player : NetworkBehaviour {
     [SerializeField]
     private Behaviour[] disableOnDeath;
     private bool[] wasEnabled;
+
+    [SerializeField]
+    PlayerVisibility playerVis;
 
     public void Setup()
     {
@@ -61,7 +58,7 @@ public class Player : NetworkBehaviour {
         {
             disableOnDeath[i].enabled = wasEnabled[i];
         }
-
+        playerVis = GetComponent<PlayerVisibility>();
         Collider col = GetComponent<Collider>();
         if (col != null)
             col.enabled = true;

@@ -1,21 +1,54 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 
 [RequireComponent(typeof(PlayerMotor))]
-public class PlayerController : MonoBehaviour {
-	
-	[SerializeField]
-	private float speed = 12f;
-	[SerializeField]
-	private float sens = 2.5f;
+[RequireComponent(typeof(PlayerVisibility))]
+public class PlayerController : NetworkBehaviour {
 
-	private PlayerMotor motor;
+    public enum PlayerState
+    {
+        Still,
+        Walking,
+        Running,
+        Jumping,
+        Shooting
+    }
 
-	void Start()
-	{
-		Debug.Log ("Started Controller");
-		Cursor.visible = false;
-		motor = GetComponent<PlayerMotor> ();
-	}
+    public static int STILL     = 1;
+    public static int WALKING   = 2;
+    public static int RUNNING   = 3;
+    public static int JUMPING   = 4;
+    public static int SHOOTING  = 5;
+
+    [SyncVar]
+    public int _state = STILL;
+    [SyncVar]
+    private int _prevState = STILL;
+
+    [SerializeField]
+    private float runSpeed = 12f;
+    [SerializeField]
+    private float sens = 2.5f;
+
+    private PlayerMotor motor;
+    private PlayerVisibility playerVis;
+    private int finalStateThisFrame;
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        _state = STILL;
+        _prevState = STILL;
+    }
+
+    void Start()
+    {
+        Debug.Log("Started Controller");
+        Cursor.visible = false;
+
+        motor = GetComponent<PlayerMotor>();
+        playerVis = GetComponent<PlayerVisibility>();
+    }
 
     void HandleMovement()
     {
@@ -25,7 +58,18 @@ public class PlayerController : MonoBehaviour {
         Vector3 movHorizontal = transform.right * xMov;
         Vector3 movVertical = transform.forward * zMov;
 
-        Vector3 velocity = (movHorizontal + movVertical).normalized * speed;
+        Vector3 velocity = (movHorizontal + movVertical).normalized * runSpeed;
+        if (!motor.inJump)
+        {
+            if (velocity.sqrMagnitude > 0)
+            {
+                finalStateThisFrame = RUNNING;
+            }
+            else
+            {
+                finalStateThisFrame = STILL;       
+            }
+        }
         motor.Move(velocity);   
 
         float yRot = Input.GetAxisRaw("Mouse X");
@@ -46,9 +90,20 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
+
 	void Update()
 	{
-        HandleMovement();
-        HandleJump();
+        if (isLocalPlayer)
+        {
+            HandleMovement();
+            HandleJump();
+            if (motor.inJump) finalStateThisFrame = JUMPING;
+            if (_state != finalStateThisFrame)
+            {
+                _prevState = _state;
+                _state = finalStateThisFrame;
+                playerVis.CmdUpdateVis(_prevState, _state);
+            }
+        }
 	}
 }
