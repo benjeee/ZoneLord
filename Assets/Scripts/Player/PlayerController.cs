@@ -11,34 +11,33 @@ public class PlayerController : NetworkBehaviour {
         Walking,
         Running,
         Jumping,
-        Shooting
+        Combat
     }
 
-    public static int STILL     = 1;
-    public static int WALKING   = 2;
-    public static int RUNNING   = 3;
-    public static int JUMPING   = 4;
-    public static int SHOOTING  = 5;
-
     [SyncVar]
-    public int _state = STILL;
+    public PlayerState _state = PlayerState.Still;
     [SyncVar]
-    private int _prevState = STILL;
+    private PlayerState _prevState = PlayerState.Still;
 
     [SerializeField]
     private float runSpeed = 12f;
+    [SerializeField]
+    private float walkSpeed = 4f;
     [SerializeField]
     private float sens = 2.5f;
 
     private PlayerMotor motor;
     private PlayerVisibility playerVis;
-    private int finalStateThisFrame;
+    private PlayerState finalStateThisFrame;
+
+    public bool canChangeState;
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-        _state = STILL;
-        _prevState = STILL;
+        _state = PlayerState.Still;
+        _prevState = PlayerState.Still;
+        canChangeState = true;
     }
 
     void Start()
@@ -50,6 +49,24 @@ public class PlayerController : NetworkBehaviour {
         playerVis = GetComponent<PlayerVisibility>();
     }
 
+    public void DisableStateChanging()
+    {
+        CancelInvoke();
+        canChangeState = false;
+    }
+
+    public void DisableStateChanging(float seconds)
+    {
+        CancelInvoke();
+        canChangeState = false;
+        Invoke("EnableStateChanging", seconds);
+    }
+
+    public void EnableStateChanging()
+    {
+        canChangeState = true;
+    }
+
     void HandleMovement()
     {
         float xMov = Input.GetAxisRaw("Horizontal");
@@ -58,17 +75,23 @@ public class PlayerController : NetworkBehaviour {
         Vector3 movHorizontal = transform.right * xMov;
         Vector3 movVertical = transform.forward * zMov;
 
-        Vector3 velocity = (movHorizontal + movVertical).normalized * runSpeed;
-        if (!motor.inJump)
+        Vector3 velocity = (movHorizontal + movVertical).normalized;
+
+        if (velocity != Vector3.zero)
         {
-            if (velocity.sqrMagnitude > 0)
+            if (Input.GetButton("Fire3"))
             {
-                finalStateThisFrame = RUNNING;
-            }
-            else
+                if(!motor.inJump) finalStateThisFrame = PlayerState.Walking;
+                velocity *= walkSpeed;
+            }else
             {
-                finalStateThisFrame = STILL;       
+                if (!motor.inJump) finalStateThisFrame = PlayerState.Running;
+                velocity *= runSpeed;
             }
+        }
+        else
+        {
+            finalStateThisFrame = PlayerState.Still;       
         }
         motor.Move(velocity);   
 
@@ -97,13 +120,18 @@ public class PlayerController : NetworkBehaviour {
         {
             HandleMovement();
             HandleJump();
-            if (motor.inJump) finalStateThisFrame = JUMPING;
-            if (_state != finalStateThisFrame)
+            if (motor.inJump) finalStateThisFrame = PlayerState.Jumping;
+            if (_state != finalStateThisFrame && canChangeState)
             {
-                _prevState = _state;
-                _state = finalStateThisFrame;
-                playerVis.CmdUpdateVis(_prevState, _state);
+                UpdateState(finalStateThisFrame);
             }
         }
 	}
+
+    public void UpdateState(PlayerState newState)
+    {
+        _prevState = _state;
+        _state = newState;
+        playerVis.CmdUpdateVis(_prevState, _state);
+    }
 }

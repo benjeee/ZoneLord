@@ -5,9 +5,6 @@ using UnityEngine.Networking;
 
 public class Player : NetworkBehaviour {
 
-
-
-
     [SyncVar]
     private bool _isDead = false;
     public bool isDead
@@ -26,8 +23,7 @@ public class Player : NetworkBehaviour {
     private Behaviour[] disableOnDeath;
     private bool[] wasEnabled;
 
-    [SerializeField]
-    PlayerVisibility playerVis;
+    UIManager uiManager;
 
     public void Setup()
     {
@@ -58,7 +54,7 @@ public class Player : NetworkBehaviour {
         {
             disableOnDeath[i].enabled = wasEnabled[i];
         }
-        playerVis = GetComponent<PlayerVisibility>();
+        uiManager = GetComponent<UIManager>();
         Collider col = GetComponent<Collider>();
         if (col != null)
             col.enabled = true;
@@ -79,6 +75,17 @@ public class Player : NetworkBehaviour {
         }
     }
 
+    [ClientRpc]
+    public void RpcNotifyZoneMoved(Vector3 previousZonePos, float radius)
+    {
+        float dist = Vector2.Distance(new Vector2(previousZonePos.x, previousZonePos.z), new Vector2(transform.position.x, transform.position.z));
+        uiManager.ShowZoneMoved();
+        if(dist > radius)
+        {
+            RpcTakeDamage(1000);
+        }
+    }
+
     private void Die()
     {
         isDead = true;
@@ -94,7 +101,6 @@ public class Player : NetworkBehaviour {
 
         Debug.Log(transform.name + " IS DEAD!!!!");
 
-        //respawn
         StartCoroutine(Respawn());
     }
 

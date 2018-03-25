@@ -1,12 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class GameManager : MonoBehaviour {
 
     public static GameManager instance;
 
+    private static Dictionary<string, Player> players = new Dictionary<string, Player>();
+
     public MatchSettings matchSettings;
+
+    public ZoneMovement zoneMovement;
+
+    public NetworkManager networkManager;
+
+    public Text zoneTimer;
+    public Text zoneMoved;
 
     void Awake()
     {
@@ -22,7 +33,6 @@ public class GameManager : MonoBehaviour {
     #region Player tracking
 
     private const string PLAYER_ID_PREFIX = "Player ";
-    private static Dictionary<string, Player> players = new Dictionary<string, Player>();
 
     public static void RegisterPlayer(string netID, Player player)
     {
@@ -42,4 +52,12 @@ public class GameManager : MonoBehaviour {
     }
 
     #endregion
+
+    public void NotifyPlayersZoneMoved(Vector3 previousZonePos, float radius)
+    {
+        foreach(Player p in players.Values)
+        {
+            p.RpcNotifyZoneMoved(previousZonePos, radius);
+        }
+    }
 }

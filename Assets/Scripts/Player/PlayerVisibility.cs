@@ -5,14 +5,13 @@ using UnityEngine.Networking;
 
 public class PlayerVisibility : NetworkBehaviour {
 
-
-    static Dictionary<int, float> StateToVisibility = new Dictionary<int, float>()
+    static Dictionary<PlayerController.PlayerState, float> StateToVisibility = new Dictionary<PlayerController.PlayerState, float>()
     {
-        { PlayerController.STILL, 0.05f},
-        { PlayerController.RUNNING, 0.7f},
-        { PlayerController.JUMPING, 0.7f},
-        { PlayerController.SHOOTING, 1f},
-        { PlayerController.WALKING, 0.2f}
+        { PlayerController.PlayerState.Still, 0.05f},
+        { PlayerController.PlayerState.Running, 0.7f},
+        { PlayerController.PlayerState.Jumping, 0.7f},
+        { PlayerController.PlayerState.Combat, 1f},
+        { PlayerController.PlayerState.Walking, 0.2f}
     };
 
 
@@ -40,7 +39,7 @@ public class PlayerVisibility : NetworkBehaviour {
     }
 
     [Command]
-    public void CmdUpdateVis(int prevState, int newState)
+    public void CmdUpdateVis(PlayerController.PlayerState prevState, PlayerController.PlayerState newState)
     {
         float lerpFrom = StateToVisibility[prevState];
         float lerpTo = StateToVisibility[newState];

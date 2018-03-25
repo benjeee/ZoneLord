@@ -7,56 +7,57 @@ using UnityEngine.Networking;
 public class ZoneMovement : NetworkBehaviour {
 
     [SerializeField]
-    float timeBetweenMoves = 30;
+    public float timeBetweenMoves = 30;
 
     [SerializeField]
     float startScale = 300;
 
-    [SyncVar]
-    float timeSinceMoved;
+    [SerializeField]
+    float shrinkFactor = .75f;
 
-    [SyncVar(hook ="ShrinkZone")]
+    [SyncVar]
+    public float timeSinceMoved;
+
+    [SyncVar]
     float currScale;
 
-	void Start () {
+    void Start()
+    {
         timeSinceMoved = 0;
         currScale = startScale;
-	}
-	
-	void Update () {
+    }
+
+    void Update()
+    {
         if (isServer)
         {
-            CmdUpdateTimeSinceMoved();
+            UpdateTimeSinceMoved();
         }
-	}
-
-    [Command]
-    void CmdUpdateTimeSinceMoved()
+    }
+    
+    void UpdateTimeSinceMoved()
     {
         timeSinceMoved += Time.deltaTime;
         if (timeSinceMoved > timeBetweenMoves)
         {
-            MoveToRandomMapPosition();
-            CmdShrinkZone();
+            RpcMoveToRandomMapPosition();
+            RpcShrinkZone();
             timeSinceMoved = 0;
         }
     }
-
-    //improve this to make sure it's fully in bounds when adding scale to position
-    void MoveToRandomMapPosition()
+    
+    [ClientRpc]
+    void RpcMoveToRandomMapPosition()
     {
-        Vector2 xz = Random.insideUnitCircle * GameManager.instance.matchSettings.mapSize / 2;
+        GameManager.instance.NotifyPlayersZoneMoved(transform.position, currScale / 2);
+        Vector2 xz = Random.insideUnitCircle * (GameManager.instance.matchSettings.mapSize - currScale / 2) / 2;
         transform.position = new Vector3(xz.x, 0, xz.y);
     }
 
-    [Command]
-    void CmdShrinkZone()
+    [ClientRpc]
+    void RpcShrinkZone()
     {
-        currScale *= .75f;
-    }
-
-    void ShrinkZone(float scale)
-    {
-        transform.localScale = new Vector3(scale, 100f, scale);
+        currScale *= shrinkFactor;
+        transform.localScale = new Vector3(currScale, 100f, currScale);
     }
 }

@@ -1,19 +1,13 @@
-﻿Shader "Unlit/Hologram"
+﻿Shader "Unlit/ShootLine"
 {
 	Properties
 	{
-		_MainTex ("Albedo Texture", 2D) = "white" {}
-		_TintColor("Tint Color", Color) = (1,1,1,1)
-		_Transparency("Transparency", Range(0.0, 1.0)) = 0.5
+		_MainTex ("Texture", 2D) = "white" {}
 	}
 	SubShader
 	{
-		Tags { "Queue"="Transparent" "RenderType"="Transparent" }
+		Tags { "RenderType"="Opaque" }
 		LOD 100
-
-
-		ZWrite off
-		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -40,15 +34,22 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			float4 _TintColor;	
-			float _Transparency;
-			float4 _VertexShift;
+			
+			float rand(float4 co)
+			{
+				return frac(sin(dot(co.xyz, float3(12.9898, 78.233, 45.5432))) * 43758.5453);
+			}
 
 			v2f vert (appdata v)
-			{	
+			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+				
+				o.vertex.x += rand(o.vertex);
+				o.vertex.y += rand(o.vertex);
+				o.vertex.z += rand(o.vertex);
+
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
 			}
@@ -56,8 +57,7 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				fixed4 col = tex2D(_MainTex, i.uv) * _TintColor;
-				col.a = _Transparency;
+				fixed4 col = tex2D(_MainTex, i.uv);
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
