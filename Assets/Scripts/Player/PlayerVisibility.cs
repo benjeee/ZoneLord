@@ -22,12 +22,16 @@ public class PlayerVisibility : NetworkBehaviour {
     private Material material;
     private Material materialInstance;
 
-    [SyncVar]
+    [SerializeField]
+    private PlayerController controller;
+
+    //[SyncVar]
     public float visibilityCoefficient;
 
     void Start () {
         visibilityCoefficient = 0.1f;
         playerRenderer = GetComponent<Renderer>();
+        controller = GetComponent<PlayerController>();
         materialInstance = (Material)Instantiate(material);
         material.shader = Shader.Find("Unlit/Hologram");
         playerRenderer.material = materialInstance;
@@ -35,26 +39,23 @@ public class PlayerVisibility : NetworkBehaviour {
 
     void Update()
     {
+        float goalVal = StateToVisibility[controller._state];
+        float time = Mathf.Abs(visibilityCoefficient - goalVal);
+        float newVal = Mathf.Lerp(visibilityCoefficient, goalVal, (Time.deltaTime / time));
+        //CmdUpdateVis(newVal);
+        visibilityCoefficient = newVal;
+        SetVis();
+    }
+
+    void SetVis()
+    {
         materialInstance.SetFloat("_Transparency", visibilityCoefficient);
     }
 
     [Command]
-    public void CmdUpdateVis(PlayerController.PlayerState prevState, PlayerController.PlayerState newState)
+    void CmdUpdateVis(float newVal)
     {
-        float lerpFrom = StateToVisibility[prevState];
-        float lerpTo = StateToVisibility[newState];
-        StartCoroutine(VisibilityLerp(lerpFrom, lerpTo));
-    }
-
-    IEnumerator VisibilityLerp(float lerpFrom, float lerpTo)
-    {
-        float elapsedTime = 0;
-        float time = Mathf.Abs(lerpFrom - lerpTo);
-        while (elapsedTime < time)
-        {
-            visibilityCoefficient = Mathf.Lerp(lerpFrom, lerpTo, (elapsedTime / time));
-            elapsedTime += Time.deltaTime;
-            yield return new WaitForEndOfFrame();
-        }
+        visibilityCoefficient = newVal;
+        //SetVis();
     }
 }

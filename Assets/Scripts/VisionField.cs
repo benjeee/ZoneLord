@@ -1,26 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class VisionField : MonoBehaviour {
+public class VisionField : NetworkBehaviour {
 
-	// Use this for initialization
+    [SerializeField]
+    float startRadius;
+
+    [SerializeField]
+    float endRadius;
+
+    float currRadius;
+
 	void Start () {
-		
+        currRadius = startRadius;
+        StartCoroutine(GrowFieldLerp(startRadius, endRadius));
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
     void OnTriggerEnter(Collider col)
     {
         if (col.gameObject.CompareTag("Player"))
         {
             PlayerController pc = col.gameObject.GetComponent<PlayerController>();
             pc.DisableStateChanging();
-            pc.UpdateState(PlayerController.PlayerState.Combat);
+            pc.CmdUpdateState(PlayerController.PlayerState.Combat);
         }
     }
 
@@ -30,6 +34,19 @@ public class VisionField : MonoBehaviour {
         {
             PlayerController pc = col.gameObject.GetComponent<PlayerController>();
             pc.canChangeState = true;
+        }
+    }
+
+    IEnumerator GrowFieldLerp(float lerpFrom, float lerpTo)
+    {
+        float elapsedTime = 0;
+        float time = 1;
+        while (elapsedTime < time)
+        {
+            currRadius = Mathf.Lerp(lerpFrom, lerpTo, (elapsedTime / time));
+            transform.localScale = new Vector3(currRadius, currRadius, currRadius);
+            elapsedTime += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
         }
     }
 }

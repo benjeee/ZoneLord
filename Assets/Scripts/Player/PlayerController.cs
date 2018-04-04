@@ -2,7 +2,6 @@
 using UnityEngine.Networking;
 
 [RequireComponent(typeof(PlayerMotor))]
-[RequireComponent(typeof(PlayerVisibility))]
 public class PlayerController : NetworkBehaviour {
 
     public enum PlayerState
@@ -16,8 +15,6 @@ public class PlayerController : NetworkBehaviour {
 
     [SyncVar]
     public PlayerState _state = PlayerState.Still;
-    [SyncVar]
-    private PlayerState _prevState = PlayerState.Still;
 
     [SerializeField]
     private float runSpeed = 12f;
@@ -27,7 +24,6 @@ public class PlayerController : NetworkBehaviour {
     private float sens = 2.5f;
 
     private PlayerMotor motor;
-    private PlayerVisibility playerVis;
     private PlayerState finalStateThisFrame;
 
     public bool canChangeState;
@@ -36,7 +32,6 @@ public class PlayerController : NetworkBehaviour {
     {
         base.OnStartClient();
         _state = PlayerState.Still;
-        _prevState = PlayerState.Still;
         canChangeState = true;
     }
 
@@ -46,7 +41,6 @@ public class PlayerController : NetworkBehaviour {
         Cursor.visible = false;
 
         motor = GetComponent<PlayerMotor>();
-        playerVis = GetComponent<PlayerVisibility>();
     }
 
     public void DisableStateChanging()
@@ -123,15 +117,14 @@ public class PlayerController : NetworkBehaviour {
             if (motor.inJump) finalStateThisFrame = PlayerState.Jumping;
             if (_state != finalStateThisFrame && canChangeState)
             {
-                UpdateState(finalStateThisFrame);
+                CmdUpdateState(finalStateThisFrame);
             }
         }
 	}
 
-    public void UpdateState(PlayerState newState)
+    [Command]
+    public void CmdUpdateState(PlayerState newState)
     {
-        _prevState = _state;
         _state = newState;
-        playerVis.CmdUpdateVis(_prevState, _state);
     }
 }

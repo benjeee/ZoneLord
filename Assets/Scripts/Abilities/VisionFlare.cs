@@ -17,7 +17,19 @@ public class VisionFlare : NetworkBehaviour {
 
     void OnTriggerEnter(Collider col)
     {
-        //spawn vision field here
+        if (isServer)
+        {
+            if (col.CompareTag("CrowTarget") || col.CompareTag("Crow")) return;
+            RpcSpawnField(transform.position, transform.rotation);
+        }
+    }
+
+
+    [ClientRpc]
+    void RpcSpawnField(Vector3 position, Quaternion rotation)
+    {
+        Transform field = Instantiate(ResourceManager.instance.visionFieldPrefab, position, rotation);
+        NetworkServer.Spawn(field.gameObject);
         Destroy(this.gameObject);
     }
 

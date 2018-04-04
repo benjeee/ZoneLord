@@ -15,7 +15,14 @@ public class BasicMissile : NetworkBehaviour {
 
     PlayerShoot playerShoot;
 
+    Player player;
+
     float castDistance;
+
+    void Awake()
+    {
+        gameObject.SetActive(false);
+    }
 
 	void Start () {
         castDistance = 4 * speed * Time.fixedDeltaTime;
@@ -31,13 +38,18 @@ public class BasicMissile : NetworkBehaviour {
         playerShoot = p;
     }
 
+    public void SetPlayer(Player p)
+    {
+        player = p;
+    }
+
     void FixedUpdate()
     {
         RaycastHit hit;
         if (Physics.Raycast(transform.position, transform.forward, out hit, castDistance, mask))
         {
-            if (hit.collider.tag == "VisionField") return;
-            if (hit.collider.tag == "Player")
+            if (hit.collider.CompareTag("Crow")) return;
+            if (hit.collider.tag == "Player" && hit.collider.name != player.name)
             {
                 playerShoot.CmdPlayerShot(hit.collider.name, damage);
             }

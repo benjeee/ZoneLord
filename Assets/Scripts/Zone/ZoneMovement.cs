@@ -58,6 +58,6 @@ public class ZoneMovement : NetworkBehaviour {
     void RpcShrinkZone()
     {
         currScale *= shrinkFactor;
-        transform.localScale = new Vector3(currScale, 100f, currScale);
+        transform.localScale = new Vector3(currScale, 500f, currScale);
     }
 }
