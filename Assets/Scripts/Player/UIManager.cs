@@ -11,12 +11,20 @@ public class UIManager : MonoBehaviour {
     [SerializeField]
     Text zoneMoved;
 
+    [SerializeField]
+    Slider healthSlider;
+
+    [SerializeField]
+    Slider manaSlider;
+
     public bool zoneMovedEnabled;
 
     void Awake()
     {
-        zoneTimer = GameManager.instance.zoneTimer;
-        zoneMoved = GameManager.instance.zoneMoved;
+        zoneTimer = ResourceManager.instance.zoneTimer;
+        zoneMoved = ResourceManager.instance.zoneMoved;
+        healthSlider = ResourceManager.instance.healthSlider;
+        manaSlider = ResourceManager.instance.manaSlider;
         zoneMoved.enabled = false;
         zoneMovedEnabled = false;
     }
@@ -43,5 +51,15 @@ public class UIManager : MonoBehaviour {
     public void UpdateZoneTimer(float timeLeft)
     {
         zoneTimer.text = timeLeft.ToString();
+    }
+
+    public void UpdateHealthSlider(float health)
+    {
+        healthSlider.value = health;
+    }
+
+    public void UpdateManaSlider(float mana)
+    {
+        manaSlider.value = mana;
     }
 }

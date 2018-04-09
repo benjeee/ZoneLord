@@ -10,7 +10,8 @@ public class PlayerController : NetworkBehaviour {
         Walking,
         Running,
         Jumping,
-        Combat
+        Combat,
+        Stealth
     }
 
     [SyncVar]
@@ -37,7 +38,6 @@ public class PlayerController : NetworkBehaviour {
 
     void Start()
     {
-        Debug.Log("Started Controller");
         Cursor.visible = false;
 
         motor = GetComponent<PlayerMotor>();
@@ -75,11 +75,11 @@ public class PlayerController : NetworkBehaviour {
         {
             if (Input.GetButton("Fire3"))
             {
-                if(!motor.inJump) finalStateThisFrame = PlayerState.Walking;
+                if(!motor.inAir) finalStateThisFrame = PlayerState.Walking;
                 velocity *= walkSpeed;
             }else
             {
-                if (!motor.inJump) finalStateThisFrame = PlayerState.Running;
+                if (!motor.inAir) finalStateThisFrame = PlayerState.Running;
                 velocity *= runSpeed;
             }
         }
@@ -114,7 +114,7 @@ public class PlayerController : NetworkBehaviour {
         {
             HandleMovement();
             HandleJump();
-            if (motor.inJump) finalStateThisFrame = PlayerState.Jumping;
+            if (motor.inAir) finalStateThisFrame = PlayerState.Jumping;
             if (_state != finalStateThisFrame && canChangeState)
             {
                 CmdUpdateState(finalStateThisFrame);

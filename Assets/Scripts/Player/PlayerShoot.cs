@@ -3,7 +3,8 @@ using UnityEngine;
 
 [RequireComponent(typeof(Player))]
 [RequireComponent(typeof(PlayerController))]
-[RequireComponent(typeof (PlayerInventory))]
+[RequireComponent(typeof(PlayerInventory))]
+[RequireComponent(typeof(PlayerAbilities))]
 public class PlayerShoot : NetworkBehaviour
 {
     public const string PLAYER_TAG = "Player";
@@ -31,6 +32,9 @@ public class PlayerShoot : NetworkBehaviour
     Player player;
 
     [SerializeField]
+    PlayerAbilities abilities;
+
+    [SerializeField]
     PlayerInventory inventory;
 
     void Start()
@@ -42,17 +46,13 @@ public class PlayerShoot : NetworkBehaviour
         }
         inventory = GetComponent<PlayerInventory>();
         controller = GetComponent<PlayerController>();
-        player = GetComponent<Player>();
+        abilities = GetComponent<PlayerAbilities>();
     }
 
-    #region input
     void Update()
     {
         HandleShootInput();
-        HandleFlareInput();
         HandleStopShooting();
-        HandleCrowInput();
-        HandleDPInput();
     }
 
     void HandleShootInput()
@@ -71,37 +71,15 @@ public class PlayerShoot : NetworkBehaviour
         }
     }
 
-    void HandleFlareInput()
-    {
-        if (Input.GetButtonDown("Fire2"))
-        {
-            Flare();
-        }
-    }
-
-    void HandleCrowInput()
-    {
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            SpawnCrow();
-        }
-    }
-
-    void HandleDPInput()
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            DistortionPlane();
-        }
-    }
-    #endregion input
-
-    #region shooting
     [Client]
     void Shoot()
     {
         if (inventory.SpendMana(shootCost))
         {
+            if (abilities.invisToggled)
+            {
+                abilities.ToggleInvis();
+            }
             CmdSpawnShot(shootPosition.transform.position, shootPosition.transform.rotation);
             if (controller.canChangeState)
             {
@@ -130,62 +108,7 @@ public class PlayerShoot : NetworkBehaviour
     [Command]
     public void CmdPlayerShot(string playerID, int damage)
     {
-        Debug.Log(playerID + "has been shot!");
-
         Player playerShot = GameManager.GetPlayer(playerID);
         playerShot.RpcTakeDamage(damage);
     }
-    #endregion shooting
-
-    #region abilities
-    [Client]
-    void Flare()
-    {
-        if (inventory.UseFlare())
-        {
-            CmdSpawnFlare(shootPosition.transform.position, shootPosition.transform.rotation);
-        }
-    }
-
-    [Command]
-    void CmdSpawnFlare(Vector3 position, Quaternion rotation)
-    {
-        Transform flare = Instantiate(ResourceManager.instance.visionFlarePrefab, position, rotation);
-        NetworkServer.Spawn(flare.gameObject);
-    }
-
-
-    [Client]
-    void SpawnCrow()
-    {
-        if (inventory.UseCrow())
-        {
-            CmdSpawnCrow(shootPosition.transform.position, shootPosition.transform.rotation);
-        }
-    }
-
-    [Command]
-    void CmdSpawnCrow(Vector3 position, Quaternion rotation)
-    {
-        Transform crow = Instantiate(ResourceManager.instance.crowPrefab, position, rotation);
-        crow.GetComponent<Crow>().SetPlayer(player);
-        crow.gameObject.SetActive(true);
-        NetworkServer.Spawn(crow.gameObject);
-    }
-
-    [Client]
-    void DistortionPlane()
-    {
-        CmdSpawnDistortionPlane(shootPosition.transform.position, shootPosition.transform.rotation);
-    }
-
-    [Command]
-    void CmdSpawnDistortionPlane(Vector3 position, Quaternion rotation)
-    {
-        Vector3 flip = rotation.eulerAngles;
-        flip.y -= 180;
-        flip.x = 0;
-        Instantiate(ResourceManager.instance.distortionPlanePrefab, position, Quaternion.Euler(flip));
-    }
-    #endregion abilities
 }

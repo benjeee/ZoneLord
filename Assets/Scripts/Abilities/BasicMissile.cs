@@ -49,12 +49,16 @@ public class BasicMissile : NetworkBehaviour {
         if (Physics.Raycast(transform.position, transform.forward, out hit, castDistance, mask))
         {
             if (hit.collider.CompareTag("Crow")) return;
+            Vector3 reflectionAngle = Vector3.Reflect(transform.forward, hit.normal);
             if (hit.collider.tag == "Player" && hit.collider.name != player.name)
             {
                 playerShoot.CmdPlayerShot(hit.collider.name, damage);
+                Instantiate(ResourceManager.instance.missilePlayerImpactPrefab, hit.point, Quaternion.FromToRotation(Vector3.forward, reflectionAngle));
             }
-            Vector3 reflectionAngle = Vector3.Reflect(transform.forward, hit.normal);
-            Instantiate(ResourceManager.instance.missileImpactPrefab, hit.point, Quaternion.FromToRotation(Vector3.forward, reflectionAngle));
+            else
+            {
+                Instantiate(ResourceManager.instance.missileImpactPrefab, hit.point, Quaternion.FromToRotation(Vector3.forward, reflectionAngle));
+            }
             Destroy(this.gameObject);
         }
     }

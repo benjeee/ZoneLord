@@ -42,7 +42,6 @@ public class Player : NetworkBehaviour {
         Transform _spawnPoint = NetworkManager.singleton.GetStartPosition();
         transform.position = _spawnPoint.position;
         transform.rotation = _spawnPoint.rotation;
-
         Debug.Log(transform.name + " respawned");
     }
 
@@ -55,6 +54,7 @@ public class Player : NetworkBehaviour {
             disableOnDeath[i].enabled = wasEnabled[i];
         }
         uiManager = GetComponent<UIManager>();
+        uiManager.UpdateHealthSlider(currHealth);
         Collider col = GetComponent<Collider>();
         if (col != null)
             col.enabled = true;
@@ -68,7 +68,7 @@ public class Player : NetworkBehaviour {
             return;
         }
         currHealth -= damage;
-        Debug.Log(transform.name + " now has " + currHealth + " health.");
+        if(isLocalPlayer) uiManager.UpdateHealthSlider(currHealth);
         if (currHealth <= 0)
         {
             Die();

@@ -16,12 +16,10 @@ public class GameManager : MonoBehaviour {
 
     public NetworkManager networkManager;
 
-    public Text zoneTimer;
-    public Text zoneMoved;
-
     void Awake()
     {
-        if(instance != null)
+        PlayerPrefs.DeleteAll();
+        if (instance != null)
         {
             Debug.LogError("More than 1 GameManager instantiated");
         } else

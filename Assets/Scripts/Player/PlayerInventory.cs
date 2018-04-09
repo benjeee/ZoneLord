@@ -16,21 +16,37 @@ public class PlayerInventory : MonoBehaviour {
     [SerializeField]
     float manaRegenPerSecond;
 
+    [SerializeField]
+    UIManager uiManager;
+
     public float mana;
     
     void Start()
     {
         mana = maxMana;
+        uiManager = GetComponent<UIManager>();
     }
 
     void Update()
     {
         mana = Mathf.Min(maxMana, mana + manaRegenPerSecond * Time.deltaTime);
+        uiManager.UpdateManaSlider(mana);
     }
 
     public void PickupItem(Pickup.PickupType type)
     {
-        Debug.Log("pickeder up");
+        switch (type)
+        {
+            case Pickup.PickupType.Crow:
+                numCrows++;
+                break;
+            case Pickup.PickupType.Flare:
+                numFlares++;
+                break;
+            default:
+                Debug.LogError("Unknown Pickup");
+                break;
+        }
     }
 
     public bool SpendMana(float amt)
@@ -38,6 +54,7 @@ public class PlayerInventory : MonoBehaviour {
         if(mana - amt > 0)
         {
             mana -= amt;
+            uiManager.UpdateManaSlider(mana);
             return true;
         }
         return false;

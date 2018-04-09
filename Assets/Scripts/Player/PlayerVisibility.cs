@@ -7,6 +7,7 @@ public class PlayerVisibility : NetworkBehaviour {
 
     static Dictionary<PlayerController.PlayerState, float> StateToVisibility = new Dictionary<PlayerController.PlayerState, float>()
     {
+        { PlayerController.PlayerState.Stealth, 0.05f},
         { PlayerController.PlayerState.Still, 0.05f},
         { PlayerController.PlayerState.Running, 0.7f},
         { PlayerController.PlayerState.Jumping, 0.7f},
@@ -41,8 +42,18 @@ public class PlayerVisibility : NetworkBehaviour {
     {
         float goalVal = StateToVisibility[controller._state];
         float time = Mathf.Abs(visibilityCoefficient - goalVal);
+        if(controller._state == PlayerController.PlayerState.Stealth)
+        {
+            time /= 4;
+        }
+        else if(goalVal > visibilityCoefficient)
+        {
+            time /= 2;
+        }else
+        {
+            time *= 3;
+        }
         float newVal = Mathf.Lerp(visibilityCoefficient, goalVal, (Time.deltaTime / time));
-        //CmdUpdateVis(newVal);
         visibilityCoefficient = newVal;
         SetVis();
     }

@@ -1,14 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ResourceManager : MonoBehaviour {
 
     public static ResourceManager instance;
 
+    #region prefabs
     public Terrain mapTerrain;
 
     public Transform missileImpactPrefab;
+    public Transform missilePlayerImpactPrefab;
     public Transform shotPrefab;
 
     public Transform visionFieldPrefab;
@@ -19,6 +22,18 @@ public class ResourceManager : MonoBehaviour {
     public Transform[,] crowTargets;
     public float spaceBetweenTargets = 10;
     public int targetListSize = 40;
+
+    public Transform crowPickupPrefab;
+    public Transform visionFlarePickupPrefab;
+    #endregion
+
+    #region UI
+    public Text zoneTimer;
+    public Text zoneMoved;
+    public Slider healthSlider;
+    public Slider manaSlider;
+    #endregion
+
 
     public Transform distortionPlanePrefab;
 

@@ -227,14 +227,15 @@ public class Crow : NetworkBehaviour {
     {
         if (player != null && col.gameObject.CompareTag("Player") && col.gameObject.name != player.name)
         {
-            Debug.Log("Stuck to player: " + col.gameObject.name);
             PlayerController controller = col.gameObject.GetComponent<PlayerController>();
-            if (controller.canChangeState)
+            PlayerAbilities abilities = col.gameObject.GetComponent<PlayerAbilities>();
+            if (abilities.invisToggled)
             {
-                controller.CmdUpdateState(PlayerController.PlayerState.Combat);
-                controller.DisableStateChanging(10);
+                abilities.ToggleInvis();
             }
-            Destroy(this.gameObject, 10);
+            controller.CmdUpdateState(PlayerController.PlayerState.Combat);
+            controller.DisableStateChanging(15);
+            Destroy(this.gameObject, 15);
         }
     }
 }

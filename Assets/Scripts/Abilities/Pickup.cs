@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(PickupSpawn))]
 public class Pickup : MonoBehaviour {
+
+    public PickupSpawn SpawnPoint { get; set; }
 
     public enum PickupType
     {
@@ -24,6 +27,7 @@ public class Pickup : MonoBehaviour {
         if (col.CompareTag("Player"))
         {
             col.GetComponent<PlayerInventory>().PickupItem(type);
+            SpawnPoint.PickupNotify();
             Destroy(this.gameObject);
         }
     }
