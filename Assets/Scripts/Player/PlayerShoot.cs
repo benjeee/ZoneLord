@@ -92,17 +92,8 @@ public class PlayerShoot : NetworkBehaviour
     [Command]
     void CmdSpawnShot(Vector3 position, Quaternion rotation)
     {
-        RpcSpawnShot(position, rotation);
-    }
-
-    [ClientRpc]
-    void RpcSpawnShot(Vector3 position, Quaternion rotation)
-    {
         Transform shot = Instantiate(ResourceManager.instance.shotPrefab, position, rotation);
-        shot.GetComponent<BasicMissile>().SetPlayerShoot(this);
-        shot.GetComponent<BasicMissile>().SetPlayer(player);
         NetworkServer.Spawn(shot.gameObject);
-        shot.gameObject.SetActive(true);
     }
 
     [Command]

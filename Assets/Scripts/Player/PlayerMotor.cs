@@ -65,7 +65,7 @@ public class PlayerMotor : NetworkBehaviour {
 	{
 		PerformMovement ();
 		PerformRotation ();
-	}
+    }
 
     Vector3 nextPos;
     Vector3 prevPos;
@@ -78,7 +78,6 @@ public class PlayerMotor : NetworkBehaviour {
             nextPos = rb.position + move;
             //fixBounce();
             rb.MovePosition(nextPos);
-            //rb.MovePosition (rb.position + velocity * Time.fixedDeltaTime);
         }
 	}
 
@@ -91,9 +90,10 @@ public class PlayerMotor : NetworkBehaviour {
         RaycastHit hit;
         if (Physics.Raycast(bottom, transform.forward, out hit, 0.5f))
         {
+            Debug.Log("Moving uphill!");
             return;
         }
-        if (Physics.Raycast(bottom, Vector3.down, out hit, 0.2f))
+        if (Physics.Raycast(bottom, Vector3.down, out hit, 0.25f))
         {
             nextPos.y -= hit.distance;
         }
@@ -125,6 +125,5 @@ public class PlayerMotor : NetworkBehaviour {
     void OnCollisionExit(Collision collisionInfo)
     {
         inAir = true;
-        
     }
 }

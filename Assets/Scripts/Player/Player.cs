@@ -60,6 +60,17 @@ public class Player : NetworkBehaviour {
             col.enabled = true;
     }
 
+    public void TakeDamage(int damage)
+    {
+        CmdTakeDamage(damage);
+    }
+
+    [Command]
+    public void CmdTakeDamage(int damage)
+    {
+        RpcTakeDamage(damage);
+    }
+
     [ClientRpc]
     public void RpcTakeDamage(int damage)
     {

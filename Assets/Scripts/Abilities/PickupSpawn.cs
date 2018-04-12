@@ -6,17 +6,16 @@ public class PickupSpawn : NetworkBehaviour {
     [SerializeField]
     float respawnTime;
 
-    public static Pickup.PickupType[] types =
+    public static AbilityItem.AbilityItemType[] types =
     {
-        Pickup.PickupType.Crow,
-        Pickup.PickupType.Flare
+        AbilityItem.AbilityItemType.Crow,
+        AbilityItem.AbilityItemType.Flare,
+        AbilityItem.AbilityItemType.Bubble
     };
-
-    System.Random rand;
 
     void Start()
     {
-        rand = new System.Random();
+        Debug.Log(Time.fixedTime);
         Spawn();
     }
 
@@ -27,23 +26,32 @@ public class PickupSpawn : NetworkBehaviour {
 
     void Spawn()
     {
-        Pickup.PickupType type = (Pickup.PickupType)types.GetValue(rand.Next(types.Length));
-        Transform pickup;
-        switch (type)
+        if (isServer)
         {
-            case Pickup.PickupType.Crow:
-                pickup = Instantiate(ResourceManager.instance.crowPickupPrefab, transform);
-                pickup.GetComponent<Pickup>().SpawnPoint = this;
-                NetworkServer.Spawn(pickup.gameObject);
-                break;
-            case Pickup.PickupType.Flare:
-                pickup = Instantiate(ResourceManager.instance.visionFlarePickupPrefab, transform);
-                pickup.GetComponent<Pickup>().SpawnPoint = this;
-                NetworkServer.Spawn(pickup.gameObject);
-                break;
-            default:
-                Debug.LogError("Trying to spawn unknown pickup type!");
-                break;
-        } 
+            int rnd = Random.Range(0, 3);
+            AbilityItem.AbilityItemType type = (AbilityItem.AbilityItemType)types.GetValue(rnd);
+            Transform pickup;
+            switch (type)
+            {
+                case AbilityItem.AbilityItemType.Crow:
+                    pickup = Instantiate(ResourceManager.instance.crowPickupPrefab, transform);
+                    pickup.GetComponent<Pickup>().SpawnPoint = this;
+                    NetworkServer.Spawn(pickup.gameObject);
+                    break;
+                case AbilityItem.AbilityItemType.Flare:
+                    pickup = Instantiate(ResourceManager.instance.visionFlarePickupPrefab, transform);
+                    pickup.GetComponent<Pickup>().SpawnPoint = this;
+                    NetworkServer.Spawn(pickup.gameObject);
+                    break;
+                case AbilityItem.AbilityItemType.Bubble:
+                    pickup = Instantiate(ResourceManager.instance.bubbleShieldPickupPrefab, transform);
+                    pickup.GetComponent<Pickup>().SpawnPoint = this;
+                    NetworkServer.Spawn(pickup.gameObject);
+                    break;
+                default:
+                    Debug.LogError("Trying to spawn unknown pickup type!");
+                    break;
+            }
+        }
     }
 }

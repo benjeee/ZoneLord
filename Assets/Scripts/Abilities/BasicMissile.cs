@@ -15,13 +15,11 @@ public class BasicMissile : NetworkBehaviour {
 
     PlayerShoot playerShoot;
 
-    Player player;
-
     float castDistance;
 
     void Awake()
     {
-        gameObject.SetActive(false);
+        playerShoot = GameManager.instance.networkManager.client.connection.playerControllers[0].gameObject.GetComponent<PlayerShoot>();
     }
 
 	void Start () {
@@ -38,11 +36,6 @@ public class BasicMissile : NetworkBehaviour {
         playerShoot = p;
     }
 
-    public void SetPlayer(Player p)
-    {
-        player = p;
-    }
-
     void FixedUpdate()
     {
         RaycastHit hit;
@@ -50,7 +43,7 @@ public class BasicMissile : NetworkBehaviour {
         {
             if (hit.collider.CompareTag("Crow")) return;
             Vector3 reflectionAngle = Vector3.Reflect(transform.forward, hit.normal);
-            if (hit.collider.tag == "Player" && hit.collider.name != player.name)
+            if (hit.collider.tag == "Player")
             {
                 playerShoot.CmdPlayerShot(hit.collider.name, damage);
                 Instantiate(ResourceManager.instance.missilePlayerImpactPrefab, hit.point, Quaternion.FromToRotation(Vector3.forward, reflectionAngle));

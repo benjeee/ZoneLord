@@ -25,6 +25,9 @@ public class ResourceManager : MonoBehaviour {
 
     public Transform crowPickupPrefab;
     public Transform visionFlarePickupPrefab;
+    public Transform bubbleShieldPickupPrefab;
+
+    public Transform bubbleShieldPrefab;
     #endregion
 
     #region UI
@@ -41,7 +44,7 @@ public class ResourceManager : MonoBehaviour {
     {
         if (instance != null)
         {
-            Debug.LogError("More than 1 GameManager instantiated");
+            Debug.LogError("More than 1 Resource Manager instantiated");
         }
         else
         {
