@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class Pickup : MonoBehaviour {
+public class Pickup : NetworkBehaviour {
 
     public PickupSpawn SpawnPoint { get; set; }
 

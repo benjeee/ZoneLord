@@ -14,16 +14,21 @@ public class Player : NetworkBehaviour {
     }
 
     [SerializeField]
-    private int maxHealth = 100;
+    private float maxHealth = 100;
 
     [SyncVar]
-    private int currHealth;
+    private float currHealth;
 
     [SerializeField]
     private Behaviour[] disableOnDeath;
     private bool[] wasEnabled;
 
-    UIManager uiManager;
+    UIManager _uiManager;
+    public UIManager uiManager
+    {
+        get { return _uiManager; }
+        set { _uiManager = value; }
+    }
 
     public void Setup()
     {
@@ -35,9 +40,8 @@ public class Player : NetworkBehaviour {
         SetDefaults();
     }
 
-    private IEnumerator Respawn()
+    private void Respawn()
     {
-        yield return new WaitForSeconds(GameManager.instance.matchSettings.respawnTime);
         SetDefaults();
         Transform _spawnPoint = NetworkManager.singleton.GetStartPosition();
         transform.position = _spawnPoint.position;
@@ -53,33 +57,32 @@ public class Player : NetworkBehaviour {
         {
             disableOnDeath[i].enabled = wasEnabled[i];
         }
-        uiManager = GetComponent<UIManager>();
-        uiManager.UpdateHealthSlider(currHealth);
+        if(_uiManager != null) _uiManager.UpdateHealthSlider(currHealth);
         Collider col = GetComponent<Collider>();
         if (col != null)
             col.enabled = true;
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage)
     {
         CmdTakeDamage(damage);
     }
 
     [Command]
-    public void CmdTakeDamage(int damage)
+    public void CmdTakeDamage(float damage)
     {
         RpcTakeDamage(damage);
     }
 
     [ClientRpc]
-    public void RpcTakeDamage(int damage)
+    public void RpcTakeDamage(float damage)
     {
         if (isDead)
         {
             return;
         }
         currHealth -= damage;
-        if(isLocalPlayer) uiManager.UpdateHealthSlider(currHealth);
+        if(isLocalPlayer) _uiManager.UpdateHealthSlider(currHealth);
         if (currHealth <= 0)
         {
             Die();
@@ -90,7 +93,7 @@ public class Player : NetworkBehaviour {
     public void RpcNotifyZoneMoved(Vector3 previousZonePos, float radius)
     {
         float dist = Vector2.Distance(new Vector2(previousZonePos.x, previousZonePos.z), new Vector2(transform.position.x, transform.position.z));
-        uiManager.ShowZoneMoved();
+        _uiManager.ShowZoneMoved();
         if(dist > radius)
         {
             RpcTakeDamage(1000);
@@ -112,7 +115,7 @@ public class Player : NetworkBehaviour {
 
         Debug.Log(transform.name + " IS DEAD!!!!");
 
-        StartCoroutine(Respawn());
+        Invoke("Respawn", GameManager.instance.matchSettings.respawnTime);
     }
 
 

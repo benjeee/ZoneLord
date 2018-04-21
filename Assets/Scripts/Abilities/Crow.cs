@@ -30,6 +30,8 @@ public class Crow : NetworkBehaviour {
     Player player;
 
     bool chasingPlayer;
+    bool onPlayer;
+    Rigidbody playerRb;
 
     [SerializeField]
     SphereCollider playerDetectCollider;
@@ -66,6 +68,10 @@ public class Crow : NetworkBehaviour {
         {
             RotateTowardsTarget();
             MoveTowardsTarget();
+            if (onPlayer)
+            {
+                playerRb.AddForce(Vector3.up + transform.forward, ForceMode.Impulse);
+            }
         }
     }
 
@@ -227,15 +233,13 @@ public class Crow : NetworkBehaviour {
     {
         if (player != null && col.gameObject.CompareTag("Player") && col.gameObject.name != player.name)
         {
-            PlayerController controller = col.gameObject.GetComponent<PlayerController>();
-            PlayerAbilities abilities = col.gameObject.GetComponent<PlayerAbilities>();
-            if (abilities.invisToggled)
+            if (!onPlayer)
             {
-                abilities.ToggleInvis();
+                onPlayer = true;
+                playerRb = col.gameObject.GetComponent<Rigidbody>();
+                moveSpeed = 100;
+                Destroy(this.gameObject, 15);
             }
-            controller.CmdUpdateState(PlayerController.PlayerState.Combat);
-            controller.DisableStateChanging(15);
-            Destroy(this.gameObject, 15);
         }
     }
 }

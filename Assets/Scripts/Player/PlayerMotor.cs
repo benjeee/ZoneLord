@@ -23,6 +23,7 @@ public class PlayerMotor : NetworkBehaviour {
 
     public bool inJump;
     public bool inAir;
+    public bool hasSecondJump;
 	private Rigidbody rb;
 
     Player player;
@@ -31,6 +32,7 @@ public class PlayerMotor : NetworkBehaviour {
 	{
         inJump = false;
         inAir = false;
+        hasSecondJump = false;
 		rb = GetComponent<Rigidbody> ();
     }
 
@@ -43,12 +45,24 @@ public class PlayerMotor : NetworkBehaviour {
     {
         if (!inAir)
         {
-            rb.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
-            inJump = true;
-            onGroundTimer = 0;
+            DoJump();
+            hasSecondJump = true;
+            return true;
+        }
+        if (hasSecondJump)
+        {
+            DoJump();
+            hasSecondJump = false;
             return true;
         }
         return false;
+    }
+
+    void DoJump()
+    {
+        rb.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
+        inJump = true;
+        onGroundTimer = 0;
     }
 
     public void Rotate(Vector3 _rotation)
@@ -90,7 +104,6 @@ public class PlayerMotor : NetworkBehaviour {
         RaycastHit hit;
         if (Physics.Raycast(bottom, transform.forward, out hit, 0.5f))
         {
-            Debug.Log("Moving uphill!");
             return;
         }
         if (Physics.Raycast(bottom, Vector3.down, out hit, 0.25f))
@@ -125,5 +138,6 @@ public class PlayerMotor : NetworkBehaviour {
     void OnCollisionExit(Collision collisionInfo)
     {
         inAir = true;
+        hasSecondJump = true;
     }
 }

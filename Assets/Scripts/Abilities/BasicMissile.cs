@@ -14,16 +14,18 @@ public class BasicMissile : NetworkBehaviour {
     public LayerMask mask;
 
     PlayerShoot playerShoot;
+    Player player;
 
     float castDistance;
 
     void Awake()
     {
+        player = GameManager.instance.networkManager.client.connection.playerControllers[0].gameObject.GetComponent<Player>();
         playerShoot = GameManager.instance.networkManager.client.connection.playerControllers[0].gameObject.GetComponent<PlayerShoot>();
     }
 
 	void Start () {
-        castDistance = 4 * speed * Time.fixedDeltaTime;
+        castDistance = 2 * speed * Time.fixedDeltaTime;
     }
 
     void Update()
@@ -45,8 +47,11 @@ public class BasicMissile : NetworkBehaviour {
             Vector3 reflectionAngle = Vector3.Reflect(transform.forward, hit.normal);
             if (hit.collider.tag == "Player")
             {
-                playerShoot.CmdPlayerShot(hit.collider.name, damage);
-                Instantiate(ResourceManager.instance.missilePlayerImpactPrefab, hit.point, Quaternion.FromToRotation(Vector3.forward, reflectionAngle));
+                if(hit.collider.name != player.name)
+                {
+                    playerShoot.CmdPlayerShot(hit.collider.name, damage);
+                    Instantiate(ResourceManager.instance.missilePlayerImpactPrefab, hit.point, Quaternion.FromToRotation(Vector3.forward, reflectionAngle));
+                }
             }
             else
             {

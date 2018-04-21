@@ -19,12 +19,8 @@ public class UIManager : MonoBehaviour {
 
     public bool zoneMovedEnabled;
 
-    void Awake()
+    void Start()
     {
-        zoneTimer = ResourceManager.instance.zoneTimer;
-        zoneMoved = ResourceManager.instance.zoneMoved;
-        healthSlider = ResourceManager.instance.healthSlider;
-        manaSlider = ResourceManager.instance.manaSlider;
         zoneMoved.enabled = false;
         zoneMovedEnabled = false;
     }

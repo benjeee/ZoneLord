@@ -17,7 +17,11 @@ public class PlayerShoot : NetworkBehaviour
     public PlayerController controller;
 
     [SerializeField]
-    Transform shootPosition;
+    Transform leftHandPosition;
+    [SerializeField]
+    Transform rightHandPosition;
+    Transform activeShootPosition;
+    int shootPositionInd;
 
     [SerializeField]
     float combatTimer;
@@ -37,6 +41,12 @@ public class PlayerShoot : NetworkBehaviour
     [SerializeField]
     PlayerInventory inventory;
 
+    [SerializeField]
+    Animator handAnimator;
+    
+
+    public LayerMask mask;
+
     void Start()
     {
         if (cam == null)
@@ -47,6 +57,8 @@ public class PlayerShoot : NetworkBehaviour
         inventory = GetComponent<PlayerInventory>();
         controller = GetComponent<PlayerController>();
         abilities = GetComponent<PlayerAbilities>();
+        shootPositionInd = 1;
+        activeShootPosition = rightHandPosition;
     }
 
     void Update()
@@ -71,22 +83,81 @@ public class PlayerShoot : NetworkBehaviour
         }
     }
 
+    RaycastHit hit;
     [Client]
     void Shoot()
     {
         if (inventory.SpendMana(shootCost))
         {
+            if (shootPositionInd == 0)
+            {
+                activeShootPosition = leftHandPosition;
+                //handAnimator.SetTrigger("LeftShot");
+            }
+            else
+            {
+                //handAnimator.SetTrigger("RightShot");
+                activeShootPosition = rightHandPosition;
+            }
+
+            if (CloseTargetShot())
+            {
+                SwapShootPosition();
+                return;
+            }
+            
             if (abilities.invisToggled)
             {
                 abilities.ToggleInvis();
             }
-            CmdSpawnShot(shootPosition.transform.position, shootPosition.transform.rotation);
+            FixAngleBetweenReticuleAndShootPosition();
+            CmdSpawnShot(activeShootPosition.transform.position, activeShootPosition.rotation);
             if (controller.canChangeState)
             {
                 controller.CmdUpdateState(PlayerController.PlayerState.Combat);
                 controller.DisableStateChanging(combatTimer);
             }
+            SwapShootPosition();
         }
+    }
+
+    void FixAngleBetweenReticuleAndShootPosition()
+    {
+        if(Physics.Raycast(cam.transform.position, cam.transform.forward, out hit, 600, mask))
+        {
+            activeShootPosition.LookAt(hit.point);
+        }else
+        {
+            Debug.LogError("Reticule pointing OOB");
+        }
+    }
+
+    void SwapShootPosition()
+    {
+        shootPositionInd = 1 - shootPositionInd;
+    }
+
+    bool CloseTargetShot()
+    {
+        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit, 1.5f, mask))
+        {
+            if (hit.collider.CompareTag("Crow")) return false;
+            Vector3 reflectionAngle = Vector3.Reflect(cam.transform.forward, hit.normal);
+            if (hit.collider.tag == "Player")
+            {
+                if (hit.collider.name != player.name)
+                {
+                    CmdPlayerShot(hit.collider.name, 25);
+                    Instantiate(ResourceManager.instance.missilePlayerImpactPrefab, hit.point, Quaternion.FromToRotation(Vector3.forward, reflectionAngle));
+                }
+            }
+            else
+            {
+                Instantiate(ResourceManager.instance.missileImpactPrefab, hit.point, Quaternion.FromToRotation(Vector3.forward, reflectionAngle));
+            }
+            return true;
+        }
+        return false;
     }
 
     [Command]
@@ -97,9 +168,11 @@ public class PlayerShoot : NetworkBehaviour
     }
 
     [Command]
-    public void CmdPlayerShot(string playerID, int damage)
+    public void CmdPlayerShot(string playerID, float damage)
     {
         Player playerShot = GameManager.GetPlayer(playerID);
-        playerShot.RpcTakeDamage(damage);
+        if(playerShot != this.player)
+            playerShot.RpcTakeDamage(damage);
     }
+
 }

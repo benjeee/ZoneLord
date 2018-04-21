@@ -7,17 +7,21 @@ public class PlayerVisibility : NetworkBehaviour {
 
     static Dictionary<PlayerController.PlayerState, float> StateToVisibility = new Dictionary<PlayerController.PlayerState, float>()
     {
-        { PlayerController.PlayerState.Stealth, 0.05f},
-        { PlayerController.PlayerState.Still, 0.05f},
-        { PlayerController.PlayerState.Running, 0.7f},
-        { PlayerController.PlayerState.Jumping, 0.7f},
+        { PlayerController.PlayerState.Stealth, 0.01f},
+        { PlayerController.PlayerState.Still, 0.5f},
+        { PlayerController.PlayerState.Running, 1f},
+        { PlayerController.PlayerState.Jumping, 1f},
         { PlayerController.PlayerState.Combat, 1f},
-        { PlayerController.PlayerState.Walking, 0.2f}
+        { PlayerController.PlayerState.Walking, 0.7f}
     };
 
 
     [SerializeField]
     private Renderer playerRenderer;
+    [SerializeField]
+    private Renderer leftHandRenderer;
+    [SerializeField]
+    private Renderer rightHandRenderer;
 
     [SerializeField]
     private Material material;
@@ -28,20 +32,26 @@ public class PlayerVisibility : NetworkBehaviour {
 
     //[SyncVar]
     public float visibilityCoefficient;
+    float goalVal;
+    float time;
 
     void Start () {
         visibilityCoefficient = 0.1f;
         playerRenderer = GetComponent<Renderer>();
         controller = GetComponent<PlayerController>();
         materialInstance = (Material)Instantiate(material);
-        material.shader = Shader.Find("Unlit/Hologram");
+        material.shader = Shader.Find("Custom/TransparentSurfaceWithCull");
         playerRenderer.material = materialInstance;
+        leftHandRenderer.material = materialInstance;
+        rightHandRenderer.material = materialInstance;
+        goalVal = 0;
+        time = 0;
     }
 
     void Update()
     {
-        float goalVal = StateToVisibility[controller._state];
-        float time = Mathf.Abs(visibilityCoefficient - goalVal);
+        goalVal = StateToVisibility[controller._state];
+        time = Mathf.Abs(visibilityCoefficient - goalVal);
         if(controller._state == PlayerController.PlayerState.Stealth)
         {
             time /= 4;
@@ -67,6 +77,5 @@ public class PlayerVisibility : NetworkBehaviour {
     void CmdUpdateVis(float newVal)
     {
         visibilityCoefficient = newVal;
-        //SetVis();
     }
 }

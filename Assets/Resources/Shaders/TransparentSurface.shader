@@ -24,6 +24,7 @@
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
+		half _Transparency;
 
 		void surf(Input IN, inout SurfaceOutputStandard o)
 		{
@@ -31,7 +32,7 @@
 			o.Albedo = c.rgb;
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
-			o.Alpha = c.a;
+			o.Alpha = _Transparency;
 		}
 		ENDCG
 	}

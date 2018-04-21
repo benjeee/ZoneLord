@@ -10,21 +10,25 @@ public class PlayerInventory : MonoBehaviour {
     [SerializeField]
     float manaRegenPerSecond;
 
-    [SerializeField]
-    UIManager uiManager;
+    UIManager _uiManager;
+    public UIManager uiManager
+    {
+        get { return _uiManager; }
+        set { _uiManager = value; }
+    }
 
     public float mana;
     
     void Start()
     {
         mana = maxMana;
-        uiManager = GetComponent<UIManager>();
     }
 
     void Update()
     {
         mana = Mathf.Min(maxMana, mana + manaRegenPerSecond * Time.deltaTime);
-        uiManager.UpdateManaSlider(mana);
+        if(uiManager != null)
+            _uiManager.UpdateManaSlider(mana);
     }
 
     public bool SpendMana(float amt)
@@ -32,7 +36,7 @@ public class PlayerInventory : MonoBehaviour {
         if(mana - amt > 0)
         {
             mana -= amt;
-            uiManager.UpdateManaSlider(mana);
+            _uiManager.UpdateManaSlider(mana);
             return true;
         }
         return false;

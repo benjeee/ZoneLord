@@ -32,14 +32,15 @@ public class PlayerAbilities : NetworkBehaviour {
 
     public bool invisToggled;
 
-    void Start () {
+    void Awake()
+    {
         player = GetComponent<Player>();
         controller = GetComponent<PlayerController>();
         inventory = GetComponent<PlayerInventory>();
         invisToggled = false;
         equipIndex = 0;
         itemBar = new AbilityItem[3];
-        for(int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
             itemBar[i] = AbilityItem.NoneItem;
         }
@@ -47,6 +48,7 @@ public class PlayerAbilities : NetworkBehaviour {
     }
 	
 	void Update () {
+        HandleSteezShot();
         HandleScrollEquip();
         HandleSwapEquip();
         HandleAbilityInput();
@@ -92,7 +94,6 @@ public class PlayerAbilities : NetworkBehaviour {
 
     bool IncrementItem(AbilityItem.AbilityItemType type)
     {
-        Debug.Log(type);
         for(int i = 0; i < 3; i++)
         {
             if(itemBar[i].ItemType != AbilityItem.AbilityItemType.None && itemBar[i].ItemType == type)
@@ -137,6 +138,14 @@ public class PlayerAbilities : NetworkBehaviour {
     #endregion itembar
 
     #region input
+    void HandleSteezShot()
+    {
+        if (Input.GetKeyDown("f"))
+        {
+            SpawnSteez();
+        }
+    }
+
     void HandleScrollEquip()
     {
         float f = Input.GetAxis("Mouse ScrollWheel");
@@ -264,6 +273,20 @@ public class PlayerAbilities : NetworkBehaviour {
         Transform bubble = Instantiate(ResourceManager.instance.bubbleShieldPrefab, position, rotation);
         bubble.GetComponent<Rigidbody>().AddForce(shootPosition.transform.forward * throwForce, ForceMode.Impulse); // newobj.Init();
         NetworkServer.Spawn(bubble.gameObject);
+    }
+
+    [Client]
+    void SpawnSteez()
+    {
+        CmdSpawnSteez(shootPosition.transform.position, shootPosition.transform.rotation, shootPosition.transform.forward);
+    }
+
+    [Command]
+    void CmdSpawnSteez(Vector3 position, Quaternion rotation, Vector3 forward)
+    {
+        Transform steez = Instantiate(ResourceManager.instance.steezPrefab, position, rotation);
+        steez.GetComponent<Steez>().Forward = forward;
+        NetworkServer.Spawn(steez.gameObject);
     }
 
     /*

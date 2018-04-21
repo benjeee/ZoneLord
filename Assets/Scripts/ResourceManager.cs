@@ -17,6 +17,8 @@ public class ResourceManager : MonoBehaviour {
     public Transform visionFieldPrefab;
     public Transform visionFlarePrefab;
 
+    public Transform steezPrefab;
+
     public Transform crowPrefab;
     public Transform crowTargetPrefab;
     public Transform[,] crowTargets;
@@ -26,6 +28,7 @@ public class ResourceManager : MonoBehaviour {
     public Transform crowPickupPrefab;
     public Transform visionFlarePickupPrefab;
     public Transform bubbleShieldPickupPrefab;
+    public Transform steezPickupPrefab;
 
     public Transform bubbleShieldPrefab;
     #endregion

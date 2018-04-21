@@ -6,12 +6,10 @@ using UnityEngine.Networking;
 public class BubbleShield : NetworkBehaviour {
 
     [SerializeField]
-    float maxHealth;
-
-    float currHealth;
-
+    float startRadius;
+        
     [SerializeField]
-    float startRadius, endRadius;
+    float endRadius;
 
     [SerializeField]
     float growthTime;
@@ -20,9 +18,9 @@ public class BubbleShield : NetworkBehaviour {
 
     void Start()
     {
-        currHealth = maxHealth;
         currRadius = startRadius;
         StartCoroutine(GrowFieldLerp(startRadius, endRadius));
+        Invoke("ShrinkField", 24f);
     }
 
     IEnumerator GrowFieldLerp(float lerpFrom, float lerpTo)
@@ -35,5 +33,10 @@ public class BubbleShield : NetworkBehaviour {
             elapsedTime += Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
+    }
+
+    void ShrinkField()
+    {
+        StartCoroutine(GrowFieldLerp(endRadius, startRadius));
     }
 }
