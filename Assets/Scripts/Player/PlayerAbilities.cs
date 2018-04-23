@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 [RequireComponent(typeof(PlayerInventory))]
 public class PlayerAbilities : NetworkBehaviour {
 
-    AbilityItem[] itemBar;
+    public AbilityItem[] itemBar;
     int numEquipped;
     int equipIndex;
 
@@ -29,6 +29,13 @@ public class PlayerAbilities : NetworkBehaviour {
 
     [SerializeField]
     Player player;
+
+    UIManager _uiManager;
+    public UIManager uiManager
+    {
+        get { return _uiManager; }
+        set { _uiManager = value; }
+    }
 
     public bool invisToggled;
 
@@ -69,6 +76,7 @@ public class PlayerAbilities : NetworkBehaviour {
         if (IncrementItem(type))
         {
             Debug.Log("Slot 1 :" + itemBar[0].ItemType + ", " + itemBar[0].count + ". " + "Slot 2 :" + itemBar[1].ItemType + ", " + itemBar[1].count + ". " + "Slot 3 :" + itemBar[2].ItemType + ", " + itemBar[2].count + ". ");
+            uiManager.UpdateItemBar(itemBar, equipIndex);
             return true;
         }
         if(numEquipped < 3)
@@ -80,6 +88,7 @@ public class PlayerAbilities : NetworkBehaviour {
                     itemBar[i] = new AbilityItem(type);
                     numEquipped++;
                     Debug.Log("Slot 1 :" + itemBar[0].ItemType + ", " + itemBar[0].count + ". " + "Slot 2 :" + itemBar[1].ItemType + ", " + itemBar[1].count + ". " + "Slot 3 :" + itemBar[2].ItemType + ", " + itemBar[2].count + ". ");
+                    uiManager.UpdateItemBar(itemBar, equipIndex);
                     return true;
                 }
             }
@@ -129,8 +138,9 @@ public class PlayerAbilities : NetworkBehaviour {
             {
                 itemBar[equipIndex] = AbilityItem.NoneItem;
                 numEquipped--;
-                //ShiftAbility(1);
+                ShiftAbility(1);
             }
+            uiManager.UpdateItemBar(itemBar, equipIndex);
             return true;
         }
         return false;
@@ -188,7 +198,7 @@ public class PlayerAbilities : NetworkBehaviour {
             if (equipIndex == 0) equipIndex = 2;
             else equipIndex--;
         }
-        //UIController.instance.ChangeEquipIndicator(equipped);
+        uiManager.UpdateItemBar(itemBar, equipIndex);
     }
 
     void SwapAbility(int val)
@@ -196,7 +206,7 @@ public class PlayerAbilities : NetworkBehaviour {
         if (val == 0 || val == 1 || val == 2)
         {
             equipIndex = val;
-            //UIController.instance.ChangeEquipIndicator(equipped);
+            uiManager.UpdateItemBar(itemBar, equipIndex);
         }
     }
 

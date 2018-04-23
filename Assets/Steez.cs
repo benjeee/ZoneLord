@@ -18,6 +18,9 @@ public class Steez : NetworkBehaviour
     [SerializeField]
     float dps;
 
+    [SerializeField]
+    float speed;
+
     List<Player> playersToDot;
 
     float elapsedTime;
@@ -31,7 +34,7 @@ public class Steez : NetworkBehaviour
     void Awake()
     {
         playersToDot = new List<Player>();
-        Forward = new Vector3(transform.forward.x, transform.forward.y, transform.forward.z);
+        Forward = new Vector3(transform.forward.x, transform.forward.y, transform.forward.z).normalized;
     }
 
     void Start()
@@ -42,7 +45,7 @@ public class Steez : NetworkBehaviour
 
     void Update()
     {
-        transform.position += Forward / 3;
+        transform.position += Forward * speed;
         DamagePlayers();
     }
 
@@ -52,7 +55,8 @@ public class Steez : NetworkBehaviour
         while (elapsedTime < growTime)
         {
             currRadius = Mathf.Lerp(lerpFrom, lerpTo, (elapsedTime / growTime));
-            transform.localScale = new Vector3(currRadius, currRadius, currRadius);
+            //transform.localScale = new Vector3(currRadius, currRadius, currRadius);
+            if (isServer) RpcUpdateScale();
             elapsedTime += Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
@@ -62,7 +66,6 @@ public class Steez : NetworkBehaviour
     {
         if (col.CompareTag("Player"))
         {
-            Debug.Log("COLLIDINGWITHPLAYER");
             StartDamaging(col.GetComponent<Player>());
         }
     }
@@ -71,7 +74,6 @@ public class Steez : NetworkBehaviour
     {
         if (col.CompareTag("Player"))
         {
-            Debug.Log("STOPPEDCOLLIDINGWITHPLAYER");
             StopDamaging(col.GetComponent<Player>());
         }
     }
@@ -97,6 +99,12 @@ public class Steez : NetworkBehaviour
             if (!p.isDead) newList.Add(p);
         }
         playersToDot = newList;
+    }
+
+    [ClientRpc]
+    void RpcUpdateScale()
+    {
+        transform.localScale = new Vector3(currRadius, currRadius, currRadius);
     }
 }
 

@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour {
 
+    Dictionary<AbilityItem.AbilityItemType, Sprite> itemToSpriteMap;
+
     [SerializeField]
     Text zoneTimer;
 
@@ -12,10 +14,23 @@ public class UIManager : MonoBehaviour {
     Text zoneMoved;
 
     [SerializeField]
-    Slider healthSlider;
+    RectTransform healthFill;
 
     [SerializeField]
-    Slider manaSlider;
+    RectTransform manaFill;
+
+    [SerializeField]
+    Sprite noneSprite, visionFlareSprite, bubbleShieldSprite, crowSprite;
+
+    [SerializeField]
+    Image itemSlot1, itemSlot2, itemSlot3;
+
+    [SerializeField]
+    Image itemEquippedInd1, itemEquippedInd2, itemEquippedInd3;
+
+    [SerializeField]
+    Text[] itemAmt;
+
 
     public bool zoneMovedEnabled;
 
@@ -23,11 +38,51 @@ public class UIManager : MonoBehaviour {
     {
         zoneMoved.enabled = false;
         zoneMovedEnabled = false;
+        itemToSpriteMap = new Dictionary<AbilityItem.AbilityItemType, Sprite>()
+        {
+            {AbilityItem.AbilityItemType.None, noneSprite },
+            {AbilityItem.AbilityItemType.Flare, visionFlareSprite },
+            {AbilityItem.AbilityItemType.Bubble, bubbleShieldSprite },
+            {AbilityItem.AbilityItemType.Crow, crowSprite }
+        };
     }
 
     void Update()
     {
         UpdateZoneTimer(GameManager.instance.zoneMovement.timeBetweenMoves - GameManager.instance.zoneMovement.timeSinceMoved);
+    }
+
+    public void UpdateItemBar(AbilityItem[] itemBar, int equippedSlot)
+    {
+        itemSlot1.sprite = itemToSpriteMap[itemBar[0].ItemType];
+        itemSlot2.sprite = itemToSpriteMap[itemBar[1].ItemType];
+        itemSlot3.sprite = itemToSpriteMap[itemBar[2].ItemType];
+        for(int i = 0; i < 3; i++)
+        {
+            if (itemBar[i].ItemType != AbilityItem.AbilityItemType.None)
+            {
+                itemAmt[i].text = itemBar[i].count.ToString();
+            }
+            else itemAmt[i].text = "";
+        }
+        if(equippedSlot == 0)
+        {
+            itemEquippedInd1.enabled = true;
+            itemEquippedInd2.enabled = false;
+            itemEquippedInd3.enabled = false;
+        }
+        else if (equippedSlot == 1)
+        {
+            itemEquippedInd1.enabled = false;
+            itemEquippedInd2.enabled = true;
+            itemEquippedInd3.enabled = false;
+        }
+        else if (equippedSlot == 2)
+        {
+            itemEquippedInd1.enabled = false;
+            itemEquippedInd2.enabled = false;
+            itemEquippedInd3.enabled = true;
+        }
     }
 
     public void ShowZoneMoved()
@@ -43,19 +98,18 @@ public class UIManager : MonoBehaviour {
         zoneTimer.enabled = true;
     }
 
-
     public void UpdateZoneTimer(float timeLeft)
     {
         zoneTimer.text = timeLeft.ToString();
     }
 
-    public void UpdateHealthSlider(float health)
+    public void UpdateHealthBar(float health)
     {
-        healthSlider.value = health;
+        healthFill.sizeDelta = new Vector2(health * 2, 20);
     }
 
-    public void UpdateManaSlider(float mana)
+    public void UpdateManaBar(float mana)
     {
-        manaSlider.value = mana;
+        manaFill.sizeDelta = new Vector2(mana * 2, 20);
     }
 }

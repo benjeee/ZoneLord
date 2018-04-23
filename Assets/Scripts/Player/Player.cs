@@ -57,7 +57,7 @@ public class Player : NetworkBehaviour {
         {
             disableOnDeath[i].enabled = wasEnabled[i];
         }
-        if(_uiManager != null) _uiManager.UpdateHealthSlider(currHealth);
+        if(_uiManager != null) _uiManager.UpdateHealthBar(currHealth);
         Collider col = GetComponent<Collider>();
         if (col != null)
             col.enabled = true;
@@ -82,7 +82,7 @@ public class Player : NetworkBehaviour {
             return;
         }
         currHealth -= damage;
-        if(isLocalPlayer) _uiManager.UpdateHealthSlider(currHealth);
+        if(isLocalPlayer) _uiManager.UpdateHealthBar(currHealth);
         if (currHealth <= 0)
         {
             Die();
@@ -93,11 +93,10 @@ public class Player : NetworkBehaviour {
     public void RpcNotifyZoneMoved(Vector3 previousZonePos, float radius)
     {
         float dist = Vector2.Distance(new Vector2(previousZonePos.x, previousZonePos.z), new Vector2(transform.position.x, transform.position.z));
-        _uiManager.ShowZoneMoved();
+        if(isLocalPlayer)
+            _uiManager.ShowZoneMoved();
         if(dist > radius)
-        {
             RpcTakeDamage(1000);
-        }
     }
 
     private void Die()
@@ -118,5 +117,11 @@ public class Player : NetworkBehaviour {
         Invoke("Respawn", GameManager.instance.matchSettings.respawnTime);
     }
 
-
+    [ClientRpc]
+    public void RpcAddForceToPlayer(string playerID, Vector3 force)
+    {
+        Debug.Log(playerID + " is being pushed by crow!!!!!!");
+        Player p = GameManager.GetPlayer(playerID);
+        p.GetComponent<Rigidbody>().AddForce(force, ForceMode.Impulse);
+    }
 }

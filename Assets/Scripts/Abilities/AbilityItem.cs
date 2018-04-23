@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 [System.Serializable]
 public class AbilityItem {
@@ -18,7 +17,6 @@ public class AbilityItem {
 
     public AbilityItemType ItemType { get; set; }
     public int count;
-    Sprite sprite;
 
     public AbilityItem()
     { 

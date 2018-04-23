@@ -28,7 +28,7 @@ public class PlayerInventory : MonoBehaviour {
     {
         mana = Mathf.Min(maxMana, mana + manaRegenPerSecond * Time.deltaTime);
         if(uiManager != null)
-            _uiManager.UpdateManaSlider(mana);
+            _uiManager.UpdateManaBar(mana);
     }
 
     public bool SpendMana(float amt)
@@ -36,7 +36,7 @@ public class PlayerInventory : MonoBehaviour {
         if(mana - amt > 0)
         {
             mana -= amt;
-            _uiManager.UpdateManaSlider(mana);
+            _uiManager.UpdateManaBar(mana);
             return true;
         }
         return false;

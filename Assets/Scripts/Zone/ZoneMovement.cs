@@ -49,9 +49,12 @@ public class ZoneMovement : NetworkBehaviour {
     [ClientRpc]
     void RpcMoveToRandomMapPosition()
     {
-        GameManager.instance.NotifyPlayersZoneMoved(transform.position, currScale / 2);
-        Vector2 xz = Random.insideUnitCircle * (GameManager.instance.matchSettings.mapSize - currScale / 2) / 2;
-        transform.position = new Vector3(xz.x, 0, xz.y);
+        if (isServer)
+        {
+            GameManager.instance.NotifyPlayersZoneMoved(transform.position, currScale / 2);
+            Vector2 xz = Random.insideUnitCircle * (GameManager.instance.matchSettings.mapSize - currScale / 2) / 2;
+            transform.position = new Vector3(xz.x, 0, xz.y);
+        }
     }
 
     [ClientRpc]

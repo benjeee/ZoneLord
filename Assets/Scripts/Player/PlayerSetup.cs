@@ -33,6 +33,7 @@ public class PlayerSetup : NetworkBehaviour {
             playerCanvasInstance.name = playerCanvasPrefab.name;
             GetComponent<Player>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
             GetComponent<PlayerInventory>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
+            GetComponent<PlayerAbilities>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
         }
         GetComponent<Player>().Setup();
 	}
