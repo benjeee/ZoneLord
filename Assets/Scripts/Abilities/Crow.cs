@@ -238,7 +238,7 @@ public class Crow : NetworkBehaviour {
                 onPlayer = true;
                 playerTarget = col.gameObject.GetComponent<Player>();
                 moveSpeed = 100;
-                Destroy(this.gameObject, 15);
+                Destroy(this.gameObject, 10);
             }
         }
     }
