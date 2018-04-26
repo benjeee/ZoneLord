@@ -23,6 +23,10 @@ public class Player : NetworkBehaviour {
     private Behaviour[] disableOnDeath;
     private bool[] wasEnabled;
 
+    PlayerShoot playerShoot;
+
+    CameraShake camShake;
+
     UIManager _uiManager;
     public UIManager uiManager
     {
@@ -32,6 +36,8 @@ public class Player : NetworkBehaviour {
 
     public void Setup()
     {
+        playerShoot = GetComponent<PlayerShoot>();
+        camShake = GetComponent<CameraShake>();
         wasEnabled = new bool[disableOnDeath.Length];
         for (int i = 0; i < wasEnabled.Length; i++)
         {
@@ -77,6 +83,7 @@ public class Player : NetworkBehaviour {
     [ClientRpc]
     public void RpcTakeDamage(float damage)
     {
+        camShake.DoShake(.2f);
         if (isDead)
         {
             return;
@@ -102,7 +109,7 @@ public class Player : NetworkBehaviour {
     private void Die()
     {
         isDead = true;
-
+        playerShoot.CancelInvoke();
         for (int i = 0; i < disableOnDeath.Length; i++)
         {
             disableOnDeath[i].enabled = false;
@@ -113,7 +120,8 @@ public class Player : NetworkBehaviour {
             col.enabled = false;
 
         Debug.Log(transform.name + " IS DEAD!!!!");
-
+        if(isLocalPlayer)
+            uiManager.ShowDeathText();
         Invoke("Respawn", GameManager.instance.matchSettings.respawnTime);
     }
 

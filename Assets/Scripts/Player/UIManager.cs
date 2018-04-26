@@ -31,13 +31,33 @@ public class UIManager : MonoBehaviour {
     [SerializeField]
     Text[] itemAmt;
 
+    [SerializeField]
+    Image invisActiveImage;
+
+    [SerializeField]
+    RectTransform invisCooldown;
+
+    [SerializeField]
+    RectTransform steezCooldown;
+
+    [SerializeField]
+    Sprite[] activeIndicatorSprites;
+
+    [SerializeField]
+    Text deathText;
+
+    int currActiveSpriteIndex;
+    bool invisActive;
 
     public bool zoneMovedEnabled;
 
     void Start()
     {
+        invisActive = false;
+        invisActiveImage.enabled = false;
         zoneMoved.enabled = false;
         zoneMovedEnabled = false;
+        deathText.enabled = false;
         itemToSpriteMap = new Dictionary<AbilityItem.AbilityItemType, Sprite>()
         {
             {AbilityItem.AbilityItemType.None, noneSprite },
@@ -49,7 +69,42 @@ public class UIManager : MonoBehaviour {
 
     void Update()
     {
-        UpdateZoneTimer(GameManager.instance.zoneMovement.timeBetweenMoves - GameManager.instance.zoneMovement.timeSinceMoved);
+        UpdateZoneTimer(GameManager.instance.zoneMovement.timeBetweenMoves - GameManager.instance.zoneMovement.timeSinceMoved); 
+    }
+
+    public void UpdateInvisCooldownInd(float pct)
+    {
+        invisCooldown.sizeDelta = new Vector2(40, 40 * pct);
+    }
+
+    public void UpdateSteezCooldownInd(float pct)
+    {
+        steezCooldown.sizeDelta = new Vector2(40, 40 * pct);
+    }
+
+    public void ToggleInvisActiveInd()
+    {
+        if (invisActive)
+        {
+            invisActive = false;
+            invisActiveImage.enabled = false;
+            CancelInvoke("SwapActiveInd");
+        }
+        else
+        {
+            invisActive = true;
+            invisActiveImage.enabled = true;
+            currActiveSpriteIndex = 0;
+            SwapActiveInd();
+        }
+    }
+
+    void SwapActiveInd()
+    {
+        invisActiveImage.sprite = activeIndicatorSprites[currActiveSpriteIndex];
+        if (currActiveSpriteIndex == activeIndicatorSprites.Length - 1) currActiveSpriteIndex = 0;
+        else currActiveSpriteIndex++;
+        Invoke("SwapActiveInd", .02f);
     }
 
     public void UpdateItemBar(AbilityItem[] itemBar, int equippedSlot)
@@ -96,6 +151,17 @@ public class UIManager : MonoBehaviour {
     {
         zoneMoved.enabled = false;
         zoneTimer.enabled = true;
+    }
+
+    public void ShowDeathText()
+    {
+        deathText.enabled = true;
+        Invoke("HideDeathText", GameManager.instance.matchSettings.respawnTime);
+    }
+
+    void HideDeathText()
+    {
+        deathText.enabled = false;
     }
 
     public void UpdateZoneTimer(float timeLeft)

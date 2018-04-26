@@ -15,6 +15,11 @@ public class GameManager : MonoBehaviour {
     public ZoneMovement zoneMovement;
 
     public NetworkManager networkManager;
+    public NetworkManagerHUD networkManagerHUD;
+
+    [SerializeField]
+    GameObject menuCanvasPrefab;
+    public GameObject menuCanvasInstance;
 
     void Awake()
     {
@@ -26,6 +31,7 @@ public class GameManager : MonoBehaviour {
         {
             instance = this;
         }
+        menuCanvasInstance = Instantiate(menuCanvasPrefab);
     }
 
     #region Player tracking

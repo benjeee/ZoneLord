@@ -14,6 +14,8 @@ public class PlayerSetup : NetworkBehaviour {
     GameObject playerCanvasPrefab;
     GameObject playerCanvasInstance;
 
+
+
     Camera sceneCamera;
 
 	void Start() {
@@ -34,6 +36,8 @@ public class PlayerSetup : NetworkBehaviour {
             GetComponent<Player>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
             GetComponent<PlayerInventory>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
             GetComponent<PlayerAbilities>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
+            GameManager.instance.networkManagerHUD.showGUI = false;
+            GameManager.instance.menuCanvasInstance.SetActive(false);
         }
         GetComponent<Player>().Setup();
 	}

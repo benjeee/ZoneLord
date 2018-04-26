@@ -18,6 +18,7 @@ public class AbilityItem {
     public AbilityItemType ItemType { get; set; }
     public int count;
 
+
     public AbilityItem()
     { 
         ItemType = AbilityItemType.None;

@@ -8,7 +8,7 @@ public class PlayerVisibility : NetworkBehaviour {
     static Dictionary<PlayerController.PlayerState, float> StateToVisibility = new Dictionary<PlayerController.PlayerState, float>()
     {
         { PlayerController.PlayerState.Stealth, 0.01f},
-        { PlayerController.PlayerState.Still, 0.5f},
+        { PlayerController.PlayerState.Still, 0.1f},
         { PlayerController.PlayerState.Running, 1f},
         { PlayerController.PlayerState.Jumping, 1f},
         { PlayerController.PlayerState.Combat, 1f},
@@ -30,7 +30,6 @@ public class PlayerVisibility : NetworkBehaviour {
     [SerializeField]
     private PlayerController controller;
 
-    //[SyncVar]
     public float visibilityCoefficient;
     float goalVal;
     float time;
@@ -61,7 +60,7 @@ public class PlayerVisibility : NetworkBehaviour {
             time /= 2;
         }else
         {
-            time *= 3;
+            time *= 8;
         }
         float newVal = Mathf.Lerp(visibilityCoefficient, goalVal, (Time.deltaTime / time));
         visibilityCoefficient = newVal;

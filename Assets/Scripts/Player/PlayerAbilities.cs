@@ -8,6 +8,11 @@ using UnityEngine.Networking;
 [RequireComponent(typeof(PlayerInventory))]
 public class PlayerAbilities : NetworkBehaviour {
 
+    public enum SecondaryAbility
+    {
+        Steez
+    }
+
     public AbilityItem[] itemBar;
     int numEquipped;
     int equipIndex;
@@ -39,8 +44,21 @@ public class PlayerAbilities : NetworkBehaviour {
 
     public bool invisToggled;
 
+    [SerializeField]
+    float invisCooldown;
+    float timeUntilCanInvis;
+
+    [SerializeField]
+    float steezManaCost;
+
+    [SerializeField]
+    float steezCooldown;
+    float timeUntilCanSteez;
+
     void Awake()
     {
+        timeUntilCanInvis = 0;
+        timeUntilCanSteez = 0;
         player = GetComponent<Player>();
         controller = GetComponent<PlayerController>();
         inventory = GetComponent<PlayerInventory>();
@@ -55,18 +73,31 @@ public class PlayerAbilities : NetworkBehaviour {
     }
 	
 	void Update () {
-        HandleSteezShot();
+        HandleSecondaryAbilityInput();
         HandleScrollEquip();
         HandleSwapEquip();
-        HandleAbilityInput();
+        HandleItemInput();
         HandleInvisToggleInput();
+
+        timeUntilCanInvis = Mathf.Max(0, timeUntilCanInvis - Time.deltaTime);
+        if(timeUntilCanInvis > 0)
+        {
+            uiManager.UpdateInvisCooldownInd(timeUntilCanInvis / invisCooldown);
+        }
         if (invisToggled)
         {
             if(!inventory.SpendMana(invisManaCostPS * Time.deltaTime))
             {
-                invisToggled = false;
-                controller.EnableStateChanging();
+                //invisToggled = false;
+                //controller.EnableStateChanging();
+                ToggleInvis();
             }
+        }
+
+        timeUntilCanSteez = Mathf.Max(0, timeUntilCanSteez - Time.deltaTime);
+        if(timeUntilCanSteez > 0)
+        {
+            uiManager.UpdateSteezCooldownInd(timeUntilCanSteez / steezCooldown);
         }
     }
 
@@ -138,7 +169,7 @@ public class PlayerAbilities : NetworkBehaviour {
             {
                 itemBar[equipIndex] = AbilityItem.NoneItem;
                 numEquipped--;
-                ShiftAbility(1);
+                ShiftItem(1);
             }
             uiManager.UpdateItemBar(itemBar, equipIndex);
             return true;
@@ -148,24 +179,18 @@ public class PlayerAbilities : NetworkBehaviour {
     #endregion itembar
 
     #region input
-    void HandleSteezShot()
-    {
-        if (Input.GetKeyDown("f"))
-        {
-            SpawnSteez();
-        }
-    }
+
 
     void HandleScrollEquip()
     {
         float f = Input.GetAxis("Mouse ScrollWheel");
         if (f < 0)
         {
-            ShiftAbility(-1);
+            ShiftItem(1);
         }
         else if (f > 0)
         {
-            ShiftAbility(1);
+            ShiftItem(-1);
         }
     }
 
@@ -173,20 +198,20 @@ public class PlayerAbilities : NetworkBehaviour {
     {
         if (Input.GetKeyDown("1"))
         {
-            SwapAbility(0);
+            SwapItem(0);
         }
         else if (Input.GetKeyDown("2"))
         {
-            SwapAbility(1);
+            SwapItem(1);
         }
         else if (Input.GetKeyDown("3"))
         {
-            SwapAbility(2);
+            SwapItem(2);
         }
     }
 
 
-    void ShiftAbility(int dir)
+    void ShiftItem(int dir)
     {
         if (dir == 1)
         {
@@ -201,7 +226,7 @@ public class PlayerAbilities : NetworkBehaviour {
         uiManager.UpdateItemBar(itemBar, equipIndex);
     }
 
-    void SwapAbility(int val)
+    void SwapItem(int val)
     {
         if (val == 0 || val == 1 || val == 2)
         {
@@ -210,7 +235,7 @@ public class PlayerAbilities : NetworkBehaviour {
         }
     }
 
-    void HandleAbilityInput()
+    void HandleItemInput()
     {
         if (Input.GetButtonDown("Fire2"))
         {
@@ -228,17 +253,37 @@ public class PlayerAbilities : NetworkBehaviour {
 
     public void ToggleInvis()
     {
-        if (!invisToggled)
+        if (!invisToggled && timeUntilCanInvis == 0)
         {
             invisToggled = true;
             controller.DisableStateChanging();
             controller.CmdUpdateState(PlayerController.PlayerState.Stealth);
-        }else
+            uiManager.ToggleInvisActiveInd();
+        }
+        else if(invisToggled)
         {
+            timeUntilCanInvis = invisCooldown;
             invisToggled = false;
             controller.EnableStateChanging();
+            uiManager.ToggleInvisActiveInd();
         }
     }
+
+    void HandleSecondaryAbilityInput()
+    {
+        if (Input.GetKeyDown("f"))
+        {
+            if(timeUntilCanSteez == 0)
+            {
+                if (inventory.SpendMana(steezManaCost))
+                {
+                    timeUntilCanSteez = steezCooldown;
+                    SpawnSteez();
+                }
+            }
+        }
+    }
+
     #endregion input
 
     #region instantiation
