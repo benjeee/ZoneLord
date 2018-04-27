@@ -43,7 +43,13 @@ public class PlayerShoot : NetworkBehaviour
 
     [SerializeField]
     Animator handAnimator;
-    
+
+    UIManager _uiManager;
+    public UIManager uiManager
+    {
+        get { return _uiManager; }
+        set { _uiManager = value; }
+    }
 
     public LayerMask mask;
 
@@ -118,6 +124,9 @@ public class PlayerShoot : NetworkBehaviour
                 controller.DisableStateChanging(combatTimer);
             }
             SwapShootPosition();
+        }else
+        {
+            uiManager.ShowNotEnoughMana();
         }
     }
 

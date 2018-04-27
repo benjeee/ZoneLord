@@ -44,6 +44,9 @@ public class UIManager : MonoBehaviour {
     Sprite[] activeIndicatorSprites;
 
     [SerializeField]
+    Image notEnoughManaInd;
+
+    [SerializeField]
     Text deathText;
 
     int currActiveSpriteIndex;
@@ -80,6 +83,24 @@ public class UIManager : MonoBehaviour {
     public void UpdateSteezCooldownInd(float pct)
     {
         steezCooldown.sizeDelta = new Vector2(40, 40 * pct);
+    }
+
+    public void ShowNotEnoughMana()
+    {
+        StartCoroutine(NotEnoughManaCoroutine(.2f));
+    }
+
+    IEnumerator NotEnoughManaCoroutine(float displayTime)
+    {
+        float time = 0;
+        float currAlpha = 1f;
+        while(time < displayTime)
+        {
+            currAlpha = Mathf.Lerp(currAlpha, 0, (time / displayTime));
+            time += Time.deltaTime;
+            notEnoughManaInd.color = new Color(1, 1, 1, currAlpha);
+            yield return new WaitForSeconds(.02f);
+        }
     }
 
     public void ToggleInvisActiveInd()

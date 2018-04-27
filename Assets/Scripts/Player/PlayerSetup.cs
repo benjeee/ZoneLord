@@ -36,6 +36,7 @@ public class PlayerSetup : NetworkBehaviour {
             GetComponent<Player>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
             GetComponent<PlayerInventory>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
             GetComponent<PlayerAbilities>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
+            GetComponent<PlayerShoot>().uiManager = playerCanvasInstance.GetComponent<UIManager>();
             GameManager.instance.networkManagerHUD.showGUI = false;
             GameManager.instance.menuCanvasInstance.SetActive(false);
         }

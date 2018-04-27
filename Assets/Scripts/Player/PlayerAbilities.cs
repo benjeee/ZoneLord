@@ -88,8 +88,7 @@ public class PlayerAbilities : NetworkBehaviour {
         {
             if(!inventory.SpendMana(invisManaCostPS * Time.deltaTime))
             {
-                //invisToggled = false;
-                //controller.EnableStateChanging();
+                uiManager.ShowNotEnoughMana();
                 ToggleInvis();
             }
         }
@@ -279,6 +278,9 @@ public class PlayerAbilities : NetworkBehaviour {
                 {
                     timeUntilCanSteez = steezCooldown;
                     SpawnSteez();
+                } else
+                {
+                    uiManager.ShowNotEnoughMana();
                 }
             }
         }
