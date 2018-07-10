@@ -30,15 +30,17 @@ public class ResourceManager : MonoBehaviour {
     public Transform bubbleShieldPickupPrefab;
     public Transform steezPickupPrefab;
 
+    public Transform invisTrailPrefab;
+
     public Transform bubbleShieldPrefab;
-    #endregion
+    #endregion prefabs
 
     #region UI
     public Text zoneTimer;
     public Text zoneMoved;
     public Slider healthSlider;
     public Slider manaSlider;
-    #endregion
+    #endregion UI
 
 
     public Transform distortionPlanePrefab;

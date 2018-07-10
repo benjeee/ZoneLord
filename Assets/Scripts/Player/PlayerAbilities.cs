@@ -55,6 +55,9 @@ public class PlayerAbilities : NetworkBehaviour {
     float steezCooldown;
     float timeUntilCanSteez;
 
+    [SerializeField]
+    float invisOutlineSpawnFrequency;
+
     void Awake()
     {
         timeUntilCanInvis = 0;
@@ -258,6 +261,9 @@ public class PlayerAbilities : NetworkBehaviour {
             controller.DisableStateChanging();
             controller.CmdUpdateState(PlayerController.PlayerState.Stealth);
             uiManager.ToggleInvisActiveInd();
+            prevPosition = transform.position;
+            prevRotation = transform.rotation;
+            InvokeRepeating("CmdSpawnInvisTrail", invisOutlineSpawnFrequency, invisOutlineSpawnFrequency);
         }
         else if(invisToggled)
         {
@@ -265,7 +271,22 @@ public class PlayerAbilities : NetworkBehaviour {
             invisToggled = false;
             controller.EnableStateChanging();
             uiManager.ToggleInvisActiveInd();
+            CancelInvoke("CmdSpawnInvisTrail");
         }
+    }
+
+    Vector3 prevPosition;
+    Quaternion prevRotation;
+    [Command]
+    void CmdSpawnInvisTrail()
+    {
+        if(Vector3.Distance(prevPosition, transform.position) > 3)
+        {
+            Transform invisTrail = Instantiate(ResourceManager.instance.invisTrailPrefab, prevPosition, prevRotation);
+            NetworkServer.Spawn(invisTrail.gameObject);
+        }
+        prevPosition = transform.position;
+        prevRotation = transform.rotation;
     }
 
     void HandleSecondaryAbilityInput()

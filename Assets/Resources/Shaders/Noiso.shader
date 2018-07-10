@@ -2,16 +2,13 @@
 {
 	SubShader
 	{
-		// Draw ourselves after all opaque geometry
 		Tags{ "Queue" = "Transparent" }
 
-		// Grab the screen behind the object into _BackgroundTexture
 		GrabPass
 		{
 			"_BackgroundTexture"
 		}
 
-		// Render the object with the texture generated above, and invert the colors
 		Pass
 		{
 			CGPROGRAM
@@ -27,11 +24,7 @@
 
 			v2f vert(appdata_base v) {
 				v2f o;
-				// use UnityObjectToClipPos from UnityCG.cginc to calculate 
-				// the clip-space of the vertex
 				o.pos = UnityObjectToClipPos(v.vertex);
-				// use ComputeGrabScreenPos function from UnityCG.cginc
-				// to get the correct texture coordinate
 				o.grabPos = ComputeGrabScreenPos(o.pos);
 
 				float x = o.grabPos.x;
@@ -40,6 +33,7 @@
 
 				o.grabPos.x = y;
 				o.grabPos.y = x;
+
 				return o;
 			}
 
@@ -48,6 +42,15 @@
 			half4 frag(v2f i) : SV_Target
 			{
 				half4 bgcolor = tex2Dproj(_BackgroundTexture, i.grabPos);
+
+				//bgcolor.r = (1 + sin(_Time.y)) / 2;
+				//bgcolor.g = (1 + cos(_Time.y)) / 2;
+				//bgcolor.b = (bgcolor.r + bgcolor.b) / 2;
+				
+				//bgcolor.g = 1 - bgcolor.g;
+				//bgcolor.b = 1 - bgcolor.b;
+				
+
 				return bgcolor;
 			}
 			ENDCG
