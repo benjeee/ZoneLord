@@ -4,5 +4,11 @@
 
 Uses Unity's matchmaking system. Just have one player host and it should be listed on the match finder with whatever name they give the server, then anyone can hop on in.
 
+Some gameplay gifs:
+
 
 [blast em](https://gfycat.com/JealousNeglectedGermanshepherd)
+
+[get em outta here](https://gfycat.com/AbandonedEnragedErin)
+
+[use a bubble shield](https://gfycat.com/SmoggyDetailedAphid)
